@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPlay - Accueil</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 230px;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 40px;
+        }
+
+        .logo span {
+            color: #16a34a;
+        }
+
+        .menu a {
+            display: block;
+            text-decoration: none;
+            color: #444;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: #e8f0ff;
+            color: #2563eb;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            padding: 25px 30px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .search-bar {
+            flex: 1;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #ccc;
+            border-radius: 14px;
+            font-size: 15px;
+        }
+
+        .filter-btn {
+            padding: 14px 22px;
+            border: none;
+            border-radius: 14px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover {
+            background: #1d4ed8;
+        }
+
+        h1 {
+            font-size: 34px;
+            margin-bottom: 20px;
+        }
+
+        .categories {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .category {
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .category.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 25px;
+        }
+
+        /* EVENTS */
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 18px;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .event-image {
+            height: 85px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #93c5fd, #86efac);
+        }
+
+        .event-info h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .event-info p {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .places {
+            font-weight: bold;
+            color: #2563eb;
+            font-size: 18px;
+        }
+
+        .event-btn {
+            margin-top: 10px;
+            padding: 9px 14px;
+            border: none;
+            border-radius: 10px;
+            background: #16a34a;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .calendar,
+        .profile-card,
+        .summary-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .calendar h3,
+        .profile-card h3,
+        .summary-card h3 {
+            margin-bottom: 15px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .calendar-grid span {
+            padding: 7px;
+            border-radius: 8px;
+        }
+
+        .calendar-grid .day {
+            background: #f1f5f9;
+        }
+
+        .calendar-grid .selected {
+            background: #2563eb;
+            color: white;
+        }
+
+        .profile-card p,
+        .summary-card p {
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .small-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #f97316;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* RESPONSIVE */
+        @media screen and (max-width: 950px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .menu {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .event-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            .top-bar {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .sidebar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- MENU GAUCHE -->
+        <aside class="sidebar">
+            <div>
+                <div class="logo">Campus<span>Play</span></div>
+
+                <nav class="menu">
+                    <a href="accueil.html" >Accueil</a>
+                    <a href="activite.html" class="active">Événements / Activités</a>
+					<a href="#">Jeux</a>
+                    <a href="#">Réservations</a>
+                    <a href="#">Notifications</a>
+					<a href="#">A propos</a>
+                </nav>
+            </div>
+
+            <div class="user-box">
+                <div class="avatar">N</div>
+                <div>
+                    <strong>Nina</strong>
+                    <p>Étudiante</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENU PRINCIPAL -->
+        <main class="main">
+
+            <div class="top-bar">
+                <div class="search-bar">
+                    <input type="text" placeholder="Rechercher un événement, une activité, une ressource...">
+                </div>
+
+                <button class="filter-btn">Filtres</button>
+            </div>
+
+            <h1>Événements / Activités</h1>
+
+            <div class="categories">
+                <div class="category active">Tous</div>
+                <div class="category">Jeux</div>
+                <div class="category">Sport</div>
+                <div class="category">Culture</div>
+                <div class="category">Atelier</div>
+                <div class="category">Tournoi</div>
+            </div>
+
+            <section class="content">
+
+                <!-- LISTE DES EVENEMENTS -->
+                <div class="events-list">
+
+                    <article class="event-card">
+                        <div class="event-image"></div>
+
+                        <div class="event-info">
+                            <h2>Soirée jeux de société</h2>
+                            <p>Mercredi 29 mai - 18h00</p>
+                            <p>Salle associative B12</p>
+                            <p>Venez découvrir plusieurs jeux avec les membres du campus.</p>
+                        </div>
+
+                        <div>
+                            <div class="places">3/10</div>
+                            <button class="event-btn">S'inscrire</button>
+                        </div>
+                    </article>
+
+                    <article class="event-card">
+                        <div class="event-image"></div>
+
+                        <div class="event-info">
+                            <h2>Tournoi Mario Kart</h2>
+                            <p>Vendredi 31 mai - 17h30</p>
+                            <p>Espace détente</p>
+                            <p>Tournoi étudiant avec classement et récompense symbolique.</p>
+                        </div>
+
+                        <div>
+                            <div class="places">7/10</div>
+                            <button class="event-btn">S'inscrire</button>
+                        </div>
+                    </article>
+
+                    <article class="event-card">
+                        <div class="event-image"></div>
+
+                        <div class="event-info">
+                            <h2>Atelier peinture</h2>
+                            <p>Lundi 3 juin - 14h00</p>
+                            <p>Salle créativité</p>
+                            <p>Atelier libre pour découvrir une activité artistique.</p>
+                        </div>
+
+                        <div>
+                            <div class="places">5/12</div>
+                            <button class="event-btn">S'inscrire</button>
+                        </div>
+                    </article>
+
+                </div>
+
+                <!-- PANNEAU DROIT -->
+                <aside class="right-panel">
+
+                    <div class="calendar">
+                        <h3>Calendrier</h3>
+
+                        <div class="calendar-grid">
+                            <strong>L</strong>
+                            <strong>M</strong>
+                            <strong>M</strong>
+                            <strong>J</strong>
+                            <strong>V</strong>
+                            <strong>S</strong>
+                            <strong>D</strong>
+
+                            <span class="day">1</span>
+                            <span class="day">2</span>
+                            <span class="day">3</span>
+                            <span class="day">4</span>
+                            <span class="day">5</span>
+                            <span class="day">6</span>
+                            <span class="day">7</span>
+
+                            <span class="day">8</span>
+                            <span class="day selected">9</span>
+                            <span class="day">10</span>
+                            <span class="day">11</span>
+                            <span class="day">12</span>
+                            <span class="day">13</span>
+                            <span class="day">14</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>Mon profil</h3>
+                        <p><strong>Nom :</strong> Nina Authier</p>
+                        <p><strong>Rôle :</strong> Étudiante</p>
+                        <p><strong>Inscriptions :</strong> 2 événements</p>
+                        <button class="small-btn">Voir mon profil</button>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>Mes activités</h3>
+                        <p>Prochain événement : Soirée jeux</p>
+                        <p>Réservation active : 1</p>
+                        <p>Notifications : 3</p>
+                    </div>
+
+                </aside>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
