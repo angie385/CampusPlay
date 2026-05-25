@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OffCampus - Connexion</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* PARTIE GAUCHE */
+        .left-panel {
+            width: 45%;
+            background: linear-gradient(135deg, #2563eb, #16a34a);
+            color: white;
+            padding: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: "";
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            top: -100px;
+            right: -120px;
+        }
+
+        .left-panel::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.10);
+            bottom: -80px;
+            left: -70px;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand img {
+            width: 190px;
+            background: white;
+            border-radius: 22px;
+            padding: 12px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+            margin-bottom: 30px;
+        }
+
+        .brand h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .brand h1 span {
+            color: #facc15;
+        }
+
+        .brand p {
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 470px;
+            opacity: 0.95;
+        }
+
+        .features {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 35px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 18px;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .feature strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .feature p {
+            font-size: 13px;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        .footer-left {
+            position: relative;
+            z-index: 2;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* PARTIE DROITE */
+        .right-panel {
+            width: 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 470px;
+            background: white;
+            border-radius: 26px;
+            padding: 34px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .top-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .top-links a:hover {
+            color: #2563eb;
+        }
+
+        .login-card h2 {
+            font-size: 32px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .role {
+            border: 1px solid #ddd;
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 13px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #444;
+            transition: 0.2s;
+        }
+
+        .role:hover,
+        .role.active {
+            background: #e8f0ff;
+            color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid #d1d5db;
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 24px 0;
+            font-size: 14px;
+            gap: 15px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+        }
+
+        .options a {
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 16px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .quick-access {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .quick-access a {
+            text-align: center;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            color: #374151;
+            background: #f9fafb;
+        }
+
+        .quick-access a:hover {
+            background: #ecfdf5;
+            border-color: #16a34a;
+            color: #16a34a;
+        }
+
+        .signup {
+            text-align: center;
+            margin-top: 24px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .signup a {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .security-note {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 14px;
+            background: #fff7ed;
+            color: #9a3412;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid #fed7aa;
+        }
+
+        @media screen and (max-width: 950px) {
+            .page {
+                flex-direction: column;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+            }
+
+            .left-panel {
+                padding: 30px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .brand h1 {
+                font-size: 34px;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            .right-panel {
+                padding: 20px;
+            }
+
+            .login-card {
+                padding: 24px;
+            }
+
+            .role-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-access {
+                grid-template-columns: 1fr;
+            }
+
+            .options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .brand img {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <section class="left-panel">
+            <div class="brand">
+                <img src="logo.jpeg" alt="Logo OffCampus">
+
+                <h1>Bienvenue sur <span>OffCampus</span></h1>
+
+                <p>
+                    La plateforme qui rassemble les associations, les événements,
+                    les activités et les ressources du campus dans un seul espace simple,
+                    clair et dynamique.
+                </p>
+
+                <div class="features">
+                    <div class="feature">
+                        <strong>Événements</strong>
+                        <p>Inscription aux soirées, tournois, ateliers et activités étudiantes.</p>
+                    </div>
+
+                    <div class="feature">
+                        <strong>Réservations</strong>
+                        <p>Gestion des salles, jeux et matériels disponibles sur le campus.</p>
+                    </div>
+
+                    <div class="feature">
+                        <strong>Membres</strong>
+                        <p>Création, modification et validation des événements associatifs.</p>
+                    </div>
+
+                    <div class="feature">
+                        <strong>Notifications</strong>
+                        <p>Suivi des inscriptions, rappels et demandes en attente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="footer-left">
+                OffCampus — Les associations, l’université autrement.
+            </p>
+        </section>
+
+        <section class="right-panel">
+
+            <div class="login-card">
+
+                <div class="top-links">
+                    <a href="accueil.html">Accueil</a>
+                    <a href="activite.html">Activités</a>
+                    <a href="a-propos.html">À propos</a>
+                </div>
+
+                <h2>Connexion</h2>
+                <p class="subtitle">
+                    Connectez-vous pour accéder à votre espace personnel selon votre rôle sur la plateforme.
+                </p>
+
+                <div class="role-selection">
+                    <div class="role active">Étudiant</div>
+                    <div class="role">Membre</div>
+                    <div class="role">Admin</div>
+                </div>
+
+                <form>
+                    <div class="form-group">
+                        <label for="email">Adresse email</label>
+                        <input type="email" id="email" placeholder="prenom.nom@campus.fr">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" placeholder="Votre mot de passe">
+                    </div>
+
+                    <div class="options">
+                        <label class="remember">
+                            <input type="checkbox">
+                            Se souvenir de moi
+                        </label>
+
+                        <a href="#">Mot de passe oublié ?</a>
+                    </div>
+
+                    <button type="button" class="btn-login" onclick="window.location.href='dashboard-membre.html'">
+                        Se connecter
+                    </button>
+                </form>
+
+                <div class="separator">ou accès rapide</div>
+
+                <div class="quick-access">
+                    <a href="accueil.html">Voir l’accueil</a>
+                    <a href="activite.html">Voir les activités</a>
+                </div>
+
+                <p class="signup">
+                    Pas encore inscrit ?
+                    <a href="#">Créer un compte</a>
+                </p>
+
+               
+
+            </div>
+
+        </section>
+
+    </div>
+
+</body>
+</html>
