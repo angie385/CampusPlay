@@ -1,4 +1,4 @@
-# OffCampus / CampusPlay
+# OffCampus
 
 OffCampus est une plateforme web de gestion associative et événementielle pour le campus.
 
