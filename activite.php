@@ -1,3 +1,10 @@
+<?php
+require_once "auth.php";
+
+$isConnected = isConnected();
+$role = getRole();
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,573 +13,618 @@
 <title>Off Campus - Activités</title>
 
 <style>
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-		font-family: Arial, sans-serif;
-	}
-
-	body {
-		background: #f7f8fc;
-		color: #15162b;
-	}
-
-	.container {
-		display: flex;
-		min-height: 100vh;
-	}
-
-	.sidebar {
-		width: 230px;
-		height: 100vh;
-		position: sticky;
-		top: 0;
-		background: white;
-		padding: 30px 22px;
-		border-right: 1px solid #e5e7eb;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-	}
-
-	.logo {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		margin-bottom: 40px;
-		width: 100%;
-	}
-
-	.logo img {
-		width: 100px;
-		height: 100px;
-		object-fit: contain;
-		display: block;
-	}
-
-	.menu a {
-		display: block;
-		text-decoration: none;
-		color: #555;
-		padding: 12px 15px;
-		border-radius: 14px;
-		margin-bottom: 10px;
-		font-weight: 600;
-	}
-
-	.menu a:hover,
-	.menu a.active {
-		background: #edf0ff;
-		color: #4f63e8;
-	}
-
-	.user-box {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		border-top: 1px solid #e5e7eb;
-		padding-top: 22px;
-	}
-
-	.avatar {
-		width: 42px;
-		height: 42px;
-		border-radius: 50%;
-		background: #4f63e8;
-		color: white;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: bold;
-	}
-
-	.main {
-		flex: 1;
-		padding: 40px;
-		min-width: 0;
-	}
-
-	.top-bar {
-		display: flex;
-		gap: 20px;
-		margin-bottom: 30px;
-	}
-
-	.search-bar {
-		flex: 1;
-	}
-
-	.search-bar input {
-		width: 100%;
-		height: 58px;
-		border: 1px solid #e1e4ef;
-		border-radius: 18px;
-		padding: 0 22px;
-		font-size: 16px;
-		background: white;
-		outline: none;
-	}
-
-	.filter-btn {
-		height: 58px;
-		padding: 0 28px;
-		border: 1px solid #e1e4ef;
-		border-radius: 18px;
-		background: white;
-		color: #15162b;
-		font-weight: bold;
-		font-size: 16px;
-		cursor: pointer;
-	}
-
-	h1 {
-		font-size: 32px;
-		margin-bottom: 25px;
-	}
-
-	.categories {
-		display: flex;
-		gap: 12px;
-		flex-wrap: wrap;
-		margin-bottom: 30px;
-	}
-
-	.category {
-		border: none;
-		padding: 10px 16px;
-		border-radius: 20px;
-		font-weight: 600;
-		font-size: 14px;
-		cursor: pointer;
-		transition: .2s;
-	}
-
-	.category:hover {
-		transform: translateY(-2px);
-		opacity: .9;
-	}
-
-	.category.active {
-		outline: 3px solid rgba(79, 99, 232, .25);
-	}
-
-	.green { background: #e9f9ef; color: #1f8f4d; }
-	.blue { background: #4f63e8; color: white; }
-	.yellow { background: #fff7d6; color: #b7791f; }
-	.pink { background: #ffe8f1; color: #c02660; }
-	.purple { background: #f1e8ff; color: #7c3aed; }
-	.blue-light { background: #e8f2ff; color: #2563eb; }
-
-	.content {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 350px;
-		gap: 35px;
-		align-items: start;
-	}
-
-	.events-list {
-		display: flex;
-		flex-direction: column;
-		gap: 25px;
-		min-width: 0;
-	}
-
-	.event-card {
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 24px;
-		padding: 22px;
-		display: grid;
-		grid-template-columns: 210px minmax(0, 1fr) 170px;
-		gap: 25px;
-		align-items: center;
-		box-shadow: 0 8px 25px rgba(0,0,0,.04);
-	}
-
-	.event-image {
-		width: 100%;
-		height: 200px;
-		border-radius: 18px;
-		object-fit: cover;
-	}
-
-	.event-info h2 {
-		font-size: 24px;
-		margin-bottom: 12px;
-
-		white-space: nowrap;
-	}
-
-	.description {
-		color: #555;
-		font-size: 15px;
-		margin-bottom: 16px;
-		line-height: 1.5;
-	}
-
-	.meta {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16px;
-		color: #666;
-		font-size: 14px;
-		margin-bottom: 10px;
-	}
-
-	.event-side {
-		text-align: right;
-	}
-
-	.places {
-		display: inline-block;
-		background: #eaf9ef;
-		color: #229954;
-		padding: 9px 16px;
-		border-radius: 20px;
-		font-weight: bold;
-		margin-bottom: 14px;
-	}
-
-	.event-btn,
-	.secondary-btn,
-	.danger-btn {
-		width: 100%;
-		padding: 12px;
-		border: none;
-		border-radius: 14px;
-		color: white;
-		font-weight: bold;
-		cursor: pointer;
-		margin-top: 8px;
-	}
-
-	.event-btn { background: #4f63e8; }
-	.secondary-btn { background: #16a34a; }
-	.danger-btn { background: #ef4444; }
-	.full { background: #fff1f2; color: #be123c; }
-
-	.right-panel {
-		position: sticky;
-		top: 30px;
-	}
-
-	.calendar,
-	.notifications,
-	.details {
-		background: white;
-		border-radius: 24px;
-		padding: 24px;
-		border: 1px solid #e5e7eb;
-		box-shadow: 0 8px 25px rgba(0,0,0,.04);
-		margin-bottom: 22px;
-	}
-
-	.details {
-		display: none;
-		padding: 0;
-		overflow: hidden;
-		position: sticky;
-		top: 30px;
-	}
-	
-	.notifications {
-		padding: 22px;
-	}
-
-	.notifications h3 {
-		font-size: 24px;
-		margin-bottom: 18px;
-	}
-
-	#notificationsList {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-	}
-
-	.notification {
-		background: #f7f8fc;
-		border-left: 4px solid #4f63e8;
-		padding: 12px 14px;
-		border-radius: 12px;
-		font-size: 14px;
-		line-height: 1.4;
-		color: #444;
-	}
-
-	.container.detail-mode .sidebar {
-		display: none;
-	}
-
-	.container.detail-mode .main {
-		padding: 28px;
-	}
-
-	.container.detail-mode .content {
-		grid-template-columns: minmax(0, 1fr) 300px 360px;
-		gap: 22px;
-	}
-
-	.container.detail-mode .right-panel {
-		width: 300px;
-	}
-
-	.container.detail-mode .details {
-		display: block;
-	}
-
-	.container.detail-mode .notifications {
-		display: none;
-	}
-
-	.side-detail-image {
-		width: 100%;
-		height: 170px;
-		object-fit: cover;
-		display: block;
-	}
-
-	.details h3 {
-		font-size: 24px;
-		margin: 18px 22px 10px;
-
-		white-space: nowrap;
-	}
-
-	.side-description {
-		margin: 0 22px 18px;
-		color: #555;
-		line-height: 1.5;
-		font-size: 15px;
-	}
-
-	.side-detail-info {
-		margin: 0 22px 18px;
-	}
-
-	.side-detail-info p {
-		margin-bottom: 12px;
-		color: #555;
-		font-size: 15px;
-	}
-
-	.close-detail {
-		position: absolute;
-		top: 12px;
-		right: 16px;
-		z-index: 5;
-		border: none;
-		background: rgba(255,255,255,0.85);
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		font-size: 22px;
-		cursor: pointer;
-	}
-
-	.detail-back-btn {
-		position: fixed;
-		top: 25px;
-		left: 25px;
-		z-index: 1000;
-		border: none;
-		background: white;
-		color: #4f63e8;
-		width: 45px;
-		height: 45px;
-		border-radius: 50%;
-		font-size: 26px;
-		font-weight: bold;
-		cursor: pointer;
-		box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-	}
-
-	.detail-tabs {
-		display: flex;
-		justify-content: space-around;
-		border-top: 1px solid #e5e7eb;
-		border-bottom: 1px solid #e5e7eb;
-		margin-bottom: 18px;
-	}
-
-	.detail-tabs span {
-		padding: 13px 6px;
-		font-size: 14px;
-		font-weight: bold;
-		color: #555;
-	}
-
-	.detail-tabs .active-tab {
-		color: #4f63e8;
-		border-bottom: 3px solid #4f63e8;
-	}
-
-	.tags {
-		display: flex;
-		gap: 8px;
-		flex-wrap: wrap;
-		margin: 0 22px 20px;
-	}
-
-	.tags span {
-		background: #edf0ff;
-		color: #4f63e8;
-		padding: 7px 12px;
-		border-radius: 14px;
-		font-size: 13px;
-		font-weight: bold;
-	}
-
-	.details .secondary-btn,
-	.details .danger-btn,
-	.details .event-btn {
-		width: calc(100% - 44px);
-		margin: 10px 22px 20px;
-	}
-
-	.calendar-top,
-	.month {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 18px;
-	}
-
-	.month {
-		font-size: 20px;
-		font-weight: bold;
-	}
-
-	.arrow {
-		font-size: 25px;
-		cursor: pointer;
-	}
-
-	.calendar-grid {
-		display: grid;
-		grid-template-columns: repeat(7, 1fr);
-		gap: 10px;
-		text-align: center;
-		font-size: 14px;
-	}
-
-	.calendar-grid strong {
-		color: #696b80;
-	}
-
-	.calendar-grid button {
-		position: relative;
-		border: none;
-		background: transparent;
-		padding: 10px 0;
-		border-radius: 12px;
-		cursor: pointer;
-	}
-
-	.calendar-grid button.event-dot::after {
-		content: "";
-		position: absolute;
-		bottom: 2px;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 5px;
-		height: 5px;
-		background: #22c55e;
-		border-radius: 50%;
-	}
-
-	.calendar-grid button.reserved-day {
-		background: rgba(79, 99, 232, 0.12);
-		border: 2px solid #4f63e8;
-		color: #4f63e8;
-		font-weight: bold;
-	}
-	
-	.calendar-grid button.today-day {
-		background: #ececec;
-		color: #15162b;
-		font-weight: bold;
-	}
-
-	.empty {
-		background: white;
-		padding: 25px;
-		border-radius: 20px;
-		color: #666;
-		text-align: center;
-	}
-
-	@media (max-width: 1200px) {
-		.container.detail-mode .content {
-			grid-template-columns: minmax(0, 1fr) 280px 330px;
-		}
-
-		.container.detail-mode .right-panel {
-			width: 280px;
-		}
-
-		.container.detail-mode .event-card {
-			grid-template-columns: 160px minmax(0, 1fr) 130px;
-			gap: 16px;
-			padding: 16px;
-		}
-
-		.container.detail-mode .event-image {
-			height: 110px;
-		}
-
-		.container.detail-mode .event-info h2 {
-			font-size: 20px;
-		}
-
-		.container.detail-mode .description,
-		.container.detail-mode .meta {
-			font-size: 13px;
-		}
-	}
-
-	@media (max-width: 1100px) {
-		.content,
-		.container.detail-mode .content {
-			grid-template-columns: 1fr;
-		}
-
-		.right-panel,
-		.container.detail-mode .right-panel {
-			position: static;
-			width: auto;
-		}
-
-		.details {
-			position: static;
-		}
-	}
-
-	@media (max-width: 850px) {
-		.container {
-			flex-direction: column;
-		}
-
-		.sidebar {
-			width: 100%;
-			height: auto;
-			position: static;
-		}
-
-		.event-card,
-		.container.detail-mode .event-card {
-			grid-template-columns: 1fr;
-		}
-
-		.event-side {
-			text-align: left;
-		}
-
-		.top-bar {
-			flex-direction: column;
-		}
-	}
+/*  ======== RESET GLOBAL & BASE  ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f7f8fc;
+    color: #15162b;
+}
+
+
+/* ========= STRUCTURE GLOBALE (Container, Sidebar, Main) ========== */
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 30px 22px;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.main {
+    flex: 1;
+    padding: 40px;
+    min-width: 0;
+}
+
+
+/* ======== LOGO & MENU LATERAL =========== */
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.logo img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+.menu a {
+    display: block;
+    text-decoration: none;
+    color: #555;
+    padding: 12px 15px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #edf0ff;
+    color: #4f63e8;
+}
+
+
+/* ======== USER BOX (Avatar + Infos) ============ */
+
+.user-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 22px;
+    cursor: pointer;
+}
+
+.user-box .avatar,
+.avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #4f63e8;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.user-box strong {
+    font-size: 15px;
+    color: #15162b;
+    display: block;
+    line-height: 1.2;
+}
+
+.user-box p {
+    font-size: 14px;
+    color: #555;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+
+/* ======== BARRE DE RECHERCHE & FILTRES ========== */
+
+.top-bar {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    flex: 1;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 58px;
+    border: 1px solid #e1e4ef;
+    border-radius: 18px;
+    padding: 0 22px;
+    font-size: 16px;
+    background: white;
+    outline: none;
+}
+
+.filter-btn {
+    height: 58px;
+    padding: 0 28px;
+    border: 1px solid #e1e4ef;
+    border-radius: 18px;
+    background: white;
+    color: #15162b;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+/* ======== TITRES & CATEGORIES ========== */
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 25px;
+}
+
+.categories {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.category {
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.category:hover {
+    transform: translateY(-2px);
+    opacity: .9;
+}
+
+.category.active {
+    outline: 3px solid rgba(79, 99, 232, .25);
+}
+
+/* Couleurs des catégories */
+.green { background: #e9f9ef; color: #1f8f4d; }
+.blue { background: #4f63e8; color: white; }
+.yellow { background: #fff7d6; color: #b7791f; }
+.pink { background: #ffe8f1; color: #c02660; }
+.purple { background: #f1e8ff; color: #7c3aed; }
+.blue-light { background: #e8f2ff; color: #2563eb; }
+
+
+/* ========  CONTENU PRINCIPAL (Liste + Panel)  ========= */
+
+.content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 35px;
+    align-items: start;
+}
+
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    min-width: 0;
+}
+
+
+/* ======= CARTE D'ÉVÉNEMENT ========= */
+
+.event-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 24px;
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr) 170px;
+    gap: 25px;
+    align-items: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,.04);
+}
+
+.event-image {
+    width: 100%;
+    height: 200px;
+    border-radius: 18px;
+    object-fit: cover;
+}
+
+.event-info h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+}
+
+.description {
+    color: #555;
+    font-size: 15px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.event-side {
+    text-align: right;
+}
+
+.places {
+    display: inline-block;
+    background: #eaf9ef;
+    color: #229954;
+    padding: 9px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+
+/* Boutons */
+.event-btn,
+.secondary-btn,
+.danger-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.event-btn { background: #4f63e8; }
+.secondary-btn { background: #16a34a; }
+.danger-btn { background: #ef4444; }
+.full { background: #fff1f2; color: #be123c; }
+
+
+/* ======== PANNEAU DROIT (Calendrier, Notifications) ========= */
+
+.right-panel {
+    position: sticky;
+    top: 30px;
+}
+
+.calendar,
+.notifications,
+.details {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 25px rgba(0,0,0,.04);
+    margin-bottom: 22px;
+}
+
+.notifications {
+    padding: 22px;
+}
+
+.notifications h3 {
+    font-size: 24px;
+    margin-bottom: 18px;
+}
+
+#notificationsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Notification */
+.notification {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 12px 14px 12px 34px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #444;
+    cursor: pointer;
+}
+
+.notification::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 17px;
+    width: 9px;
+    height: 9px;
+    background: #22c55e;
+    border-radius: 50%;
+}
+
+.notification.read {
+    background: #f1f1f1;
+    color: #777;
+}
+
+.notification.read::before {
+    display: none;
+}
+
+
+/* ====== MODE DÉTAIL (Affichage étendu) ======= */
+
+.container.detail-mode .sidebar {
+    display: none;
+}
+
+.container.detail-mode .main {
+    padding: 28px;
+}
+
+.container.detail-mode .content {
+    grid-template-columns: minmax(0, 1fr) 300px 360px;
+    gap: 22px;
+}
+
+.container.detail-mode .right-panel {
+    width: 300px;
+}
+
+.container.detail-mode .details {
+    display: block;
+}
+
+.container.detail-mode .notifications {
+    display: none;
+}
+
+
+/* ====== PANNEAU DÉTAIL (Images, Infos, Tabs) ======== */
+
+.side-detail-image {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+}
+
+.details h3 {
+    font-size: 24px;
+    margin: 18px 22px 10px;
+    white-space: nowrap;
+}
+
+.side-description,
+.side-detail-info {
+    margin: 0 22px 18px;
+    color: #555;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.side-detail-info p {
+    margin-bottom: 12px;
+}
+
+.close-detail {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    z-index: 5;
+    border: none;
+    background: rgba(255,255,255,0.85);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.detail-back-btn {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    z-index: 1000;
+    border: none;
+    background: white;
+    color: #4f63e8;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 26px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.detail-tabs {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 18px;
+}
+
+.detail-tabs span {
+    padding: 13px 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+}
+
+.detail-tabs .active-tab {
+    color: #4f63e8;
+    border-bottom: 3px solid #4f63e8;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0 22px 20px;
+}
+
+.tags span {
+    background: #edf0ff;
+    color: #4f63e8;
+    padding: 7px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.details .secondary-btn,
+.details .danger-btn,
+.details .event-btn {
+    width: calc(100% - 44px);
+    margin: 10px 22px 20px;
+}
+
+
+/* ===== CALENDRIER ======= */
+
+.calendar-top,
+.month {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.month {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.arrow {
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.calendar-grid strong {
+    color: #696b80;
+}
+
+.calendar-grid button {
+    position: relative;
+    border: none;
+    background: transparent;
+    padding: 10px 0;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.calendar-grid button.selected-day {
+    background: #e8f0ff;
+    color: #4f63e8;
+    border: 2px solid #4f63e8;
+    font-weight: bold;
+}
+
+.calendar-grid button.event-dot::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    background: #22c55e;
+    border-radius: 50%;
+}
+
+.calendar-grid button.reserved-day {
+    background: #f0ffe8;
+    border: 2px solid #47cf00;
+    color: #47cf00;
+    font-weight: bold;
+}
+
+.calendar-grid button.today-day {
+    background: #ececec;
+    color: #15162b;
+    font-weight: bold;
+}
+
+.empty {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    color: #666;
+    text-align: center;
+}
+
+
+/* ==== RESPONSIVE DESIGN ==== */
+
+@media (max-width: 1200px) {
+    .container.detail-mode .content {
+        grid-template-columns: minmax(0, 1fr) 280px 330px;
+    }
+
+    .container.detail-mode .right-panel {
+        width: 280px;
+    }
+
+    .container.detail-mode .event-card {
+        grid-template-columns: 160px minmax(0, 1fr) 130px;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .container.detail-mode .event-image {
+        height: 110px;
+    }
+
+    .container.detail-mode .event-info h2 {
+        font-size: 20px;
+    }
+
+    .container.detail-mode .description,
+    .container.detail-mode .meta {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .content,
+    .container.detail-mode .content {
+        grid-template-columns: 1fr;
+    }
+
+    .right-panel,
+    .container.detail-mode .right-panel {
+        position: static;
+        width: auto;
+    }
+
+    .details {
+        position: static;
+    }
+}
 
 </style>
 </head>
@@ -583,26 +635,53 @@
 <aside class="sidebar">
     <div>
         <div class="logo">
-            <img src="logo.jpeg" alt="Logo Off Campus">
+            <img src="images/logo.jpeg" alt="Logo Off Campus">
         </div>
 
         <nav class="menu">
-            <a href="accueil.html">Accueil</a>
-            <a href="activite.html" class="active">Événements / Activités</a>
-            <a href="#">Jeux</a>
-            <a href="#">Réservations</a>
-            <a href="#">Notifications</a>
-            <a href="#">À propos</a>
-        </nav>
+			<a href="accueil.php">Accueil</a>
+
+			<a href="activite.php" class="active">
+				Événements / Activités
+			</a>
+
+			<?php if ($role === "membre") : ?>
+				<a href="dashboard-membre.php">Tableau de bord</a>
+				<a href="evenement-membre.php">Créer un événement</a>
+			<?php else : ?>
+				<a href="#">Jeux</a>
+			<?php endif; ?>
+
+
+			<a href="#">Réservations</a>
+			<a href="#">Notifications</a>
+			<a href="#">À propos</a>
+			<a href="profil.php">Mon compte</a>
+
+		</nav>
     </div>
 
-    <div class="user-box">
-        <div class="avatar">N</div>
-        <div>
-            <strong>Nina</strong>
-            <p id="roleText">Étudiante</p>
-        </div>
-    </div>
+    <div class="user-box" onclick="window.location.href='profil.php'" style="cursor:pointer;">
+    
+		<div class="avatar">
+			<?php echo strtoupper(substr($_SESSION["surname"] ?? "N", 0, 1)); ?>
+		</div>
+
+		<div>
+			<strong>
+				<?php echo htmlspecialchars($_SESSION["surname"] ?? "Nina"); ?>
+			</strong>
+
+			<p id="roleText">
+				<?php
+					echo ($_SESSION["role"] ?? "etudiant") === "membre"
+						? "Membre association"
+						: "Étudiant";
+				?>
+			</p>
+		</div>
+
+	</div>
 </aside>
 
 <main class="main">
@@ -611,7 +690,12 @@
         <div class="search-bar">
             <input id="searchInput" type="text" placeholder="🔍 Rechercher un événement, une activité, un lieu...">
         </div>
-        <button class="filter-btn" onclick="resetFilters()">Réinitialiser</button>
+        <select class="filter-btn" id="sortSelect" onchange="sortEvents()">
+			<option value="">Trier</option>
+			<option value="theme">Par thème</option>
+			<option value="date">Par date</option>
+			<option value="places">Par places disponibles</option>
+		</select>
     </div>
 
     <h1>Événements à venir</h1>
@@ -646,11 +730,16 @@
 			
 
             <div class="notifications">
-                <h3>Notifications</h3>
-                <div id="notificationsList">
-                    <div class="notification">Bienvenue sur Off Campus.</div>
-                </div>
-            </div>
+				<h3>Notifications</h3>
+
+				<div id="notificationsList">
+
+					<div class="notification unread" onclick="markAsRead(this)">
+						<p>Bienvenue sur Off Campus.</p>
+					</div>
+
+				</div>
+			</div>
         </aside>
 		
 		<div class="details" id="detailsBox"></div>
@@ -661,8 +750,8 @@
 </div>
 
 <script>
-const USER_ROLE = "etudiant"; 
-// Change en "membre" pour afficher les actions de gestion.
+const USER_ROLE = "<?php echo $role; ?>";
+const IS_CONNECTED = <?php echo $isConnected ? "true" : "false"; ?>;
 
 let selectedFilter = "Tous";
 let selectedDay = null;
@@ -866,7 +955,7 @@ const events = [
 ];
 
 document.getElementById("roleText").textContent =
-    USER_ROLE === "membre" ? "Membre association" : "Étudiante";
+    USER_ROLE === "membre" ? "Membre association" : "Étudiant";
 
 function renderEvents() {
     const list = document.getElementById("eventsList");
@@ -900,7 +989,7 @@ function renderEvents() {
         card.className = "event-card";
 
         card.innerHTML = `
-            <img src="${event.image}" alt="${event.title}" class="event-image">
+            <img src="images/${event.image}" alt="${event.title}" class="event-image">
 
             <div class="event-info">
                 <h2>${event.title}</h2>
@@ -970,7 +1059,7 @@ function showDetails(id) {
 		<button class="detail-back-btn" onclick="closeDetails()">←</button>
         <button class="close-detail" onclick="closeDetails()">×</button>
 
-        <img src="${event.image}" alt="${event.title}" class="side-detail-image">
+        <img src="images/${event.image}" alt="${event.title}" class="side-detail-image">
 
         <h3>${event.title}</h3>
 
@@ -1010,6 +1099,11 @@ function closeDetails() {
 }
 
 function joinEvent(id) {
+    if (!IS_CONNECTED) {
+        window.location.href = "connexion.php";
+        return;
+    }
+
     const event = events.find(e => e.id === id);
 
     if (event.registered < event.capacity && !event.joined) {
@@ -1038,6 +1132,11 @@ function leaveEvent(id) {
 }
 
 function joinWaitingList(id) {
+    if (!IS_CONNECTED) {
+        window.location.href = "connexion.php";
+        return;
+    }
+
     const event = events.find(e => e.id === id);
     event.waiting = true;
     addNotification(`Tu es sur liste d’attente pour : ${event.title}`);
@@ -1085,12 +1184,16 @@ function addNotification(message) {
     const list = document.getElementById("notificationsList");
 
     const notif = document.createElement("div");
-    notif.className = "notification";
-    notif.innerHTML = `
-        <p>${message}</p>
-    `;
+    notif.className = "notification unread";
+    notif.setAttribute("onclick", "markAsRead(this)");
+
+    notif.innerHTML = `<p>${message}</p>`;
 
     list.prepend(notif);
+}
+
+function markAsRead(notification) {
+    notification.classList.add("read");
 }
 
 let currentMonth = new Date().getMonth();
@@ -1173,6 +1276,10 @@ function renderCalendar() {
 
         if (hasReservation)
             button.classList.add("reserved-day");
+			
+		if (selectedDay === day) {
+			button.classList.add("selected-day");
+		}
 
         button.onclick = () => {
 
@@ -1231,6 +1338,29 @@ function resetFilters() {
 
     renderCalendar();
     renderEvents();
+}
+
+function sortEvents() {
+    const sortValue = document.getElementById("sortSelect").value;
+
+    if (sortValue === "theme") {
+        events.sort((a, b) => a.category.localeCompare(b.category));
+    }
+
+    if (sortValue === "date") {
+        events.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+    }
+
+    if (sortValue === "places") {
+        events.sort((a, b) => {
+            const placesA = a.capacity - a.registered;
+            const placesB = b.capacity - b.registered;
+            return placesB - placesA;
+        });
+    }
+
+    renderEvents();
+    renderCalendar();
 }
 
 renderEvents();

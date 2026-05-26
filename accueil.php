@@ -226,8 +226,8 @@
         </header>
 
         <nav>
-            <a href="accueil.html" class="active">Accueil</a>
-            <a href="activite.html">Événements / Activités</a>
+            <a href="accueil.php" class="active">Accueil</a>
+            <a href="activite.php">Événements / Activités</a>
             <a href="#">Jeux</a>
             <a href="#">Réservations</a>
             <a href="#">Communauté</a>
