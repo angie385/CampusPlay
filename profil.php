@@ -488,7 +488,7 @@ body {
 		<aside class="sidebar">
 			<div>
 				<div class="logo">
-					<img src="images/logo.jpeg" alt="Logo Off Campus">
+					<a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
 				</div>
 
 				<nav class="menu">

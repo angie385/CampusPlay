@@ -489,7 +489,7 @@ textarea:focus {
         <aside class="sidebar">
             <div>
                 <div class="logo-box">
-                    <img src="images/logo.jpeg" alt="Logo OffCampus">
+                    <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
                     <div class="logo-text">Off<span>Campus</span></div>
                 </div>
 

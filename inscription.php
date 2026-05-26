@@ -22,7 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("
-            INSERT INTO users (name, surname, email, password, role, association)
+            INSERT INTO users (name, surname, email, password, rol
+			e, association)
             VALUES (?, ?, ?, ?, ?, ?)
         ");
 
@@ -390,7 +391,7 @@ body{
 
         <div class="brand">
 
-            <img src="images/logo.jpeg" alt="Logo OffCampus">
+            <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
 
             <h1>Rejoignez <span>OffCampus</span></h1>
 

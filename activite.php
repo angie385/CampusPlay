@@ -1,8 +1,10 @@
 <?php
 require_once "auth.php";
+requireLogin();
+
+$role = getRole();
 
 $isConnected = isConnected();
-$role = getRole();
 ?>
 
 <!DOCTYPE html>
@@ -137,7 +139,7 @@ body {
 }
 
 .search-bar {
-    flex: 1;
+    flex: 4;
 }
 
 .search-bar input {
@@ -635,10 +637,10 @@ h1 {
 <aside class="sidebar">
     <div>
         <div class="logo">
-            <img src="images/logo.jpeg" alt="Logo Off Campus">
+            <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
         </div>
 
-        <nav class="menu">
+       <nav class="menu">
 			<a href="accueil.php">Accueil</a>
 
 			<a href="activite.php" class="active">
@@ -652,12 +654,14 @@ h1 {
 				<a href="#">Jeux</a>
 			<?php endif; ?>
 
-
 			<a href="#">Réservations</a>
 			<a href="#">Notifications</a>
 			<a href="#">À propos</a>
 			<a href="profil.php">Mon compte</a>
 
+			<?php if ($role === "membre") : ?>
+				<a href="deconnexion.php">Déconnexion</a>
+			<?php endif; ?>
 		</nav>
     </div>
 

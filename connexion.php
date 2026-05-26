@@ -572,7 +572,7 @@ body {
 
         <section class="left-panel">
             <div class="brand">
-                <img src="images/logo.jpeg" alt="Logo OffCampus">
+                <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
 
                 <h1>Bienvenue sur <span>OffCampus</span></h1>
 

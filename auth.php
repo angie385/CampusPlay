@@ -15,13 +15,4 @@ function requireLogin() {
         exit;
     }
 }
-
-function requireMember() {
-    requireLogin();
-
-    if (getRole() !== "membre") {
-        header("Location: activite.php");
-        exit;
-    }
-}
 ?>
