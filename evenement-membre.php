@@ -1,6 +1,16 @@
 <?php
 require_once "auth.php";
 requireMember();
+require_once "notification_helper.php";
+
+addNotification(
+    $pdo,
+    $_SESSION["user_id"],
+    "Événement ajouté",
+    "Votre événement a bien été ajouté sur OffCampus.",
+    "success",
+    "dashboard-membre.php"
+);
 ?>
 
 <!DOCTYPE html>
@@ -11,6 +21,8 @@ requireMember();
     <title>OffCampus - Gestion des événements</title>
 
     <style>
+/*  ======== RESET GLOBAL & BASE  ========== */
+
 * {
     margin: 0;
     padding: 0;
@@ -28,7 +40,8 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+
+/*  ======== SIDEBAR  ========== */
 
 .sidebar {
     width: 230px;
@@ -117,7 +130,8 @@ body {
     line-height: 1.2;
 }
 
-/* MAIN */
+
+/*  ======== MAIN  ========== */
 
 .main {
     flex: 1;
@@ -143,7 +157,8 @@ body {
     line-height: 1.5;
 }
 
-/* BUTTONS */
+
+/*  ======== BUTTONS  ========== */
 
 .btn {
     border: none;
@@ -185,7 +200,8 @@ body {
     background: #ea580c;
 }
 
-/* CONTENT */
+
+/*  ======== CONTENT LAYOUT  ========== */
 
 .content {
     display: grid;
@@ -207,7 +223,8 @@ body {
     color: #111827;
 }
 
-/* FORM */
+
+/*  ======== FORMULAIRE  ========== */
 
 .form-grid {
     display: grid;
@@ -243,11 +260,6 @@ textarea {
     background: white;
 }
 
-input[type="file"] {
-    padding: 11px;
-    cursor: pointer;
-}
-
 textarea {
     min-height: 110px;
     resize: vertical;
@@ -258,23 +270,6 @@ select:focus,
 textarea:focus {
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.image-preview {
-    display: none;
-    margin-top: 12px;
-    width: 100%;
-    max-height: 190px;
-    object-fit: cover;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-}
-
-.image-help {
-    color: #666;
-    font-size: 13px;
-    margin-top: 7px;
-    line-height: 1.4;
 }
 
 .form-actions {
@@ -316,7 +311,8 @@ textarea:focus {
     font-weight: bold;
 }
 
-/* EVENTS LIST */
+
+/*  ======== EVENTS LIST  ========== */
 
 .events-list {
     display: flex;
@@ -365,16 +361,6 @@ textarea:focus {
     font-size: 14px;
     margin-bottom: 5px;
     line-height: 1.4;
-}
-
-.event-thumb {
-    width: 100%;
-    max-width: 260px;
-    height: 135px;
-    object-fit: cover;
-    border-radius: 16px;
-    margin: 10px 0;
-    border: 1px solid #e5e7eb;
 }
 
 .badges {
@@ -446,7 +432,8 @@ textarea:focus {
     border: 1px dashed #ccc;
 }
 
-/* RESPONSIVE */
+
+/*  ======== RESPONSIVE  ========== */
 
 @media screen and (max-width: 1050px) {
     .content {
@@ -501,6 +488,7 @@ textarea:focus {
         text-align: center;
     }
 }
+
     </style>
 </head>
 
@@ -511,37 +499,36 @@ textarea:focus {
         <aside class="sidebar">
             <div>
                 <div class="logo-box">
-                    <a href="accueil.php">
-                        <img src="images/logo.jpeg" alt="Logo Off Campus">
-                    </a>
+                    <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
                     <div class="logo-text">Off<span>Campus</span></div>
                 </div>
 
                 <nav class="menu">
-                    <a href="accueil.php">Accueil</a>
-                    <a href="activite.php">Événements / Activités</a>
-                    <a href="dashboard-membre.php">Tableau de bord</a>
-                    <a href="evenement-membre.php" class="active">Créer un événement</a>
-                    <a href="#">Réservations</a>
-                    <a href="#">Notifications</a>
-                    <a href="a-propos.html">À propos</a>
-                    <a href="profil.php">Mon compte</a>
-                </nav>
+					<a href="accueil.php">Accueil</a>
+					<a href="activite.php">Événements / Activités</a>
+					<a href="dashboard-membre.php">Tableau de bord</a>
+					<a href="evenement-membre.php" class="active">Créer un événement</a>
+					<a href="#">Réservations</a>
+					<a href="#">Notifications</a>
+					<a href="a_propos.php">À propos</a>
+					<a href="profil.php">Mon compte</a>
+				</nav>
             </div>
 
-            <div class="user-box" onclick="window.location.href='profil.php'">
-                <div class="avatar">
-                    <?php echo strtoupper(substr($_SESSION["surname"] ?? "M", 0, 1)); ?>
-                </div>
+			<div class="user-box" onclick="window.location.href='profil.php'">
+				<div class="avatar">
+					<?php echo strtoupper(substr($_SESSION["surname"] ?? "M", 0, 1)); ?>
+				</div>
 
-                <div>
-                    <strong>
-                        <?php echo htmlspecialchars($_SESSION["surname"] ?? "Membre"); ?>
-                    </strong>
-                    <p>Membre association</p>
-                </div>
-            </div>
-        </aside>
+				<div>
+					<strong>
+						<?php echo htmlspecialchars($_SESSION["surname"] ?? "Membre"); ?>
+					</strong>
+
+					<p>Membre association</p>
+				</div>
+			</div>        
+		</aside>
 
         <main class="main">
 
@@ -561,52 +548,49 @@ textarea:focus {
                 <div class="panel">
                     <h2 id="formTitle">Créer un événement</h2>
 
-                    <form id="eventForm" enctype="multipart/form-data">
+                    <form id="eventForm">
                         <div class="form-grid">
 
                             <div class="form-group">
                                 <label for="eventName">Nom de l’événement</label>
-                                <input type="text" id="eventName" name="name" placeholder="Ex : Tournoi Mario Kart" required>
+                                <input type="text" id="eventName" placeholder="Ex : Tournoi Mario Kart" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventCategory">Catégorie</label>
-                                <select id="eventCategory" name="category" required>
+                                <select id="eventCategory" required>
                                     <option value="">Choisir une catégorie</option>
-                                    <option value="Soirées jeux">Soirées jeux</option>
-                                    <option value="Tournois">Tournois</option>
-                                    <option value="Ateliers">Ateliers</option>
-                                    <option value="Culture">Culture</option>
+                                    <option value="Jeux">Jeux</option>
                                     <option value="Sport">Sport</option>
-                                    <option value="Récurrents">Récurrents</option>
+                                    <option value="Culture">Culture</option>
+                                    <option value="Atelier">Atelier</option>
+                                    <option value="Tournoi">Tournoi</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventDate">Date</label>
-                                <input type="date" id="eventDate" name="event_date" required>
+                                <input type="date" id="eventDate" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventTime">Heure</label>
-                                <input type="time" id="eventTime" name="event_time" required>
+                                <input type="time" id="eventTime" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventPlace">Lieu</label>
-                                <input type="text" id="eventPlace" name="place" placeholder="Ex : Salle B12" required>
+                                <input type="text" id="eventPlace" placeholder="Ex : Salle B12" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventCapacity">Capacité maximale</label>
-                                <input type="number" id="eventCapacity" name="capacity" min="1" placeholder="Ex : 40" required>
+                                <input type="number" id="eventCapacity" min="1" placeholder="Ex : 40" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventStatus">Statut</label>
-                                <select id="eventStatus" name="status" required>
-                                    <option value="Ouvert">Ouvert</option>
-                                    <option value="Complet">Complet</option>
+                                <select id="eventStatus" required>
                                     <option value="Publié">Publié</option>
                                     <option value="Brouillon">Brouillon</option>
                                     <option value="À valider">À valider</option>
@@ -615,7 +599,7 @@ textarea:focus {
 
                             <div class="form-group">
                                 <label for="eventResource">Ressource nécessaire</label>
-                                <select id="eventResource" name="resource">
+                                <select id="eventResource">
                                     <option value="Aucune">Aucune</option>
                                     <option value="Salle">Salle</option>
                                     <option value="Matériel audio">Matériel audio</option>
@@ -625,17 +609,8 @@ textarea:focus {
                             </div>
 
                             <div class="form-group full">
-                                <label for="eventImage">Image de l’événement</label>
-                                <input type="file" id="eventImage" name="image" accept="image/*">
-                                <p class="image-help">
-                                    Choisissez une image depuis votre PC. Formats conseillés : JPG, PNG ou WEBP.
-                                </p>
-                                <img id="imagePreview" class="image-preview" alt="Aperçu de l’image">
-                            </div>
-
-                            <div class="form-group full">
                                 <label for="eventDescription">Description</label>
-                                <textarea id="eventDescription" name="description" placeholder="Présentez l’événement, les conditions de participation et les informations utiles..." required></textarea>
+                                <textarea id="eventDescription" placeholder="Présentez l’événement, les conditions de participation et les informations utiles..." required></textarea>
                             </div>
 
                         </div>
@@ -650,13 +625,14 @@ textarea:focus {
                     <div class="error-box" id="errorBox"></div>
 
                     <div class="info-box">
-                        Les événements sont enregistrés dans MySQL via PHP. 
-                        L’image choisie sera enregistrée dans le dossier <strong>images/</strong>.
+                        Les événements sont maintenant enregistrés dans la base MySQL via PHP.
+                        Ils pourront être réutilisés dans le tableau de bord associatif.
                     </div>
                 </div>
 
                 <div class="panel">
                     <h2>Événements de l’association</h2>
+
                     <div class="events-list" id="eventsList"></div>
                 </div>
 
@@ -678,8 +654,6 @@ textarea:focus {
         const submitBtn = document.getElementById("submitBtn");
         const successBox = document.getElementById("successBox");
         const errorBox = document.getElementById("errorBox");
-        const eventImage = document.getElementById("eventImage");
-        const imagePreview = document.getElementById("imagePreview");
 
         function showSuccess(message) {
             successBox.textContent = message;
@@ -708,31 +682,10 @@ textarea:focus {
         }
 
         function getStatusClass(status) {
-            if (status === "Ouvert" || status === "Publié") return "green";
+            if (status === "Publié") return "green";
             if (status === "À valider") return "orange";
             return "blue";
         }
-
-        function getEventImage(event) {
-            if (event.image && event.image.trim() !== "") {
-                return "images/" + event.image;
-            }
-
-            return "images/Jeu de societe.jpg";
-        }
-
-        eventImage.addEventListener("change", function() {
-            const file = this.files[0];
-
-            if (!file) {
-                imagePreview.style.display = "none";
-                imagePreview.src = "";
-                return;
-            }
-
-            imagePreview.src = URL.createObjectURL(file);
-            imagePreview.style.display = "block";
-        });
 
         async function loadEvents() {
             try {
@@ -776,16 +729,13 @@ textarea:focus {
 
                     <div class="event-content">
                         <h3>${event.name}</h3>
-
-                        <img class="event-thumb" src="${getEventImage(event)}" alt="${event.name}">
-
                         <p><strong>${event.event_date}</strong> à ${event.event_time} — ${event.place}</p>
-                        <p>${event.description || ""}</p>
+                        <p>${event.description}</p>
 
                         <div class="badges">
-                            <span class="badge purple">${event.category || "Sans catégorie"}</span>
-                            <span class="badge ${getStatusClass(event.status)}">${event.status || "Ouvert"}</span>
-                            <span class="badge blue">${event.registered || 0} / ${event.capacity || 0} inscrits</span>
+                            <span class="badge purple">${event.category}</span>
+                            <span class="badge ${getStatusClass(event.status)}">${event.status}</span>
+                            <span class="badge blue">${event.capacity} places</span>
                             <span class="badge orange">${event.resource || "Aucune ressource"}</span>
                         </div>
 
@@ -803,33 +753,28 @@ textarea:focus {
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
 
-            const formData = new FormData();
-
-            formData.append("id", editingId || "");
-            formData.append("name", document.getElementById("eventName").value);
-            formData.append("category", document.getElementById("eventCategory").value);
-            formData.append("event_date", document.getElementById("eventDate").value);
-            formData.append("event_time", document.getElementById("eventTime").value);
-            formData.append("place", document.getElementById("eventPlace").value);
-            formData.append("capacity", document.getElementById("eventCapacity").value);
-            formData.append("status", document.getElementById("eventStatus").value);
-            formData.append("resource", document.getElementById("eventResource").value);
-            formData.append("description", document.getElementById("eventDescription").value);
-
-            if (eventImage.files.length > 0) {
-                formData.append("image", eventImage.files[0]);
-            }
-
-            if (editingId) {
-                formData.append("_method", "PUT");
-            } else {
-                formData.append("_method", "POST");
-            }
+            const eventData = {
+                id: editingId,
+                name: document.getElementById("eventName").value,
+                category: document.getElementById("eventCategory").value,
+                event_date: document.getElementById("eventDate").value,
+                event_time: document.getElementById("eventTime").value,
+                place: document.getElementById("eventPlace").value,
+                capacity: document.getElementById("eventCapacity").value,
+                status: document.getElementById("eventStatus").value,
+                resource: document.getElementById("eventResource").value,
+                description: document.getElementById("eventDescription").value
+            };
 
             try {
+                const method = editingId ? "PUT" : "POST";
+
                 const response = await fetch(API_URL, {
-                    method: "POST",
-                    body: formData
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(eventData)
                 });
 
                 const data = await response.json();
@@ -854,25 +799,16 @@ textarea:focus {
                 return;
             }
 
-            document.getElementById("eventName").value = event.name || "";
-            document.getElementById("eventCategory").value = event.category || "";
-            document.getElementById("eventDate").value = event.event_date || "";
-            document.getElementById("eventTime").value = event.event_time || "";
-            document.getElementById("eventPlace").value = event.place || "";
-            document.getElementById("eventCapacity").value = event.capacity || "";
-            document.getElementById("eventStatus").value = event.status || "Ouvert";
+            document.getElementById("eventName").value = event.name;
+            document.getElementById("eventCategory").value = event.category;
+            document.getElementById("eventDate").value = event.event_date;
+            document.getElementById("eventTime").value = event.event_time;
+            document.getElementById("eventPlace").value = event.place;
+            document.getElementById("eventCapacity").value = event.capacity;
+            document.getElementById("eventStatus").value = event.status;
             document.getElementById("eventResource").value = event.resource || "Aucune";
-            document.getElementById("eventDescription").value = event.description || "";
+            document.getElementById("eventDescription").value = event.description;
 
-            if (event.image && event.image.trim() !== "") {
-                imagePreview.src = "images/" + event.image;
-                imagePreview.style.display = "block";
-            } else {
-                imagePreview.style.display = "none";
-                imagePreview.src = "";
-            }
-
-            eventImage.value = "";
             editingId = event.id;
             formTitle.textContent = "Modifier un événement";
             submitBtn.textContent = "Enregistrer les modifications";
@@ -915,10 +851,8 @@ textarea:focus {
         function resetForm() {
             form.reset();
             editingId = null;
-            formTitle.textContent = "Créer un événement";
+            formTitle.textContent = "Créerr un événement";
             submitBtn.textContent = "Ajouter l’événement";
-            imagePreview.style.display = "none";
-            imagePreview.src = "";
         }
 
         loadEvents();

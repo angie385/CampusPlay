@@ -1,6 +1,26 @@
 <?php
 require_once "auth.php";
 requireMember();
+require_once "notification_helper.php";
+
+addNotification(
+    $pdo,
+    $_SESSION["user_id"],
+    "Événement ajouté",
+    "Votre événement a bien été ajouté sur OffCampus.",
+    "success",
+    "dashboard-membre.php"
+);
+
+addNotification(
+    $pdo,
+    $_SESSION["user_id"],
+    "Événement accepté",
+    "La demande d’événement a bien été acceptée.",
+    "success",
+    "dashboard-membre.php"
+);
+
 ?>
 
 <!DOCTYPE html>
@@ -433,9 +453,9 @@ body {
 					<a href="activite.php">Événements / Activités</a>
 					<a href="dashboard-membre.php" class="active">Tableau de bord</a>
 					<a href="evenement-membre.php">Créer un événement</a>
-					<a href="reservations.html">Réservations</a>
+					<a href="reservations.php">Réservations</a>
 					<a href="#">Notifications</a>
-					<a href="a-propos.html">À propos</a>
+					<a href="a-propos.php">À propos</a>
 					<a href="profil.php">Mon compte</a>
 				</nav>
             </div>

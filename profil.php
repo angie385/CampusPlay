@@ -69,8 +69,6 @@ body {
 
 /*  ======== SIDEBAR  ========== */
 
-/* SIDEBAR */
-
 .sidebar {
     width: 230px;
     height: 100vh;
@@ -93,8 +91,8 @@ body {
 }
 
 .logo img {
-    width: 110px;
-    height: 110px;
+    width: 150px;
+    height: 150px;
     object-fit: contain;
     display: block;
 }
@@ -485,48 +483,7 @@ body {
 
 	<div class="container">
 
-		<aside class="sidebar">
-			<div>
-				<div class="logo">
-					<a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
-				</div>
-
-				<nav class="menu">
-					<a href="accueil.php">Accueil</a>
-
-					<a href="activite.php" >Événements / Activités</a>
-
-					<?php if ($role === "membre") : ?>
-						<a href="dashboard-membre.php">Tableau de bord</a>
-						<a href="evenement-membre.php">Créer un événement</a>
-					<?php else : ?>
-						<a href="jeux.php">Jeux</a>
-					<?php endif; ?>
-
-					<a href="reservations.html">Réservations</a>
-					<a href="#">Notifications</a>
-					<a href="a-propos.html">À propos</a>
-					<a href="profil.php" class="active">Mon compte</a>
-				</nav>
-			</div>
-
-			<div>
-				<div class="user-box" onclick="toggleLogout()">
-					<div class="avatar">
-						<?php echo strtoupper(substr($surname, 0, 1)); ?>
-					</div>
-
-					<div>
-						<strong><?php echo htmlspecialchars($surname); ?></strong>
-						<p><?php echo $role === "membre" ? "Membre association" : "Étudiant"; ?></p>
-					</div>
-				</div>
-
-				<a href="deconnexion.php" class="logout-link" id="logoutLink">
-					Déconnexion
-				</a>
-			</div>
-		</aside>
+		<?php include "sidebar.php"; ?>
 
 		<main class="main">
 

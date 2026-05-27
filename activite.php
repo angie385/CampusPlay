@@ -1,9 +1,23 @@
 <?php
 require_once "auth.php";
 requireLogin();
+require_once "db.php";
+require_once "notification_helper.php";
 
 $role = getRole();
 $isConnected = isConnected();
+
+$stmtNotif = $pdo->prepare("
+    SELECT *
+    FROM notifications
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 3
+");
+
+$stmtNotif->execute([$_SESSION["user_id"]]);
+$latestNotifications = $stmtNotif->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -14,6 +28,7 @@ $isConnected = isConnected();
 <title>Off Campus - Activités</title>
 
 <style>
+/*  ======== RESET GLOBAL & BASE  ========== */
 * {
     margin: 0;
     padding: 0;
@@ -25,6 +40,9 @@ body {
     background: #f7f8fc;
     color: #15162b;
 }
+
+
+/* ========= STRUCTURE GLOBALE (Container, Sidebar, Main) ========== */
 
 .container {
     display: flex;
@@ -50,6 +68,9 @@ body {
     min-width: 0;
 }
 
+
+/* ======== LOGO & MENU LATERAL =========== */
+
 .logo {
     display: flex;
     justify-content: center;
@@ -59,8 +80,8 @@ body {
 }
 
 .logo img {
-    width: 110px;
-    height: 110px;
+    width: 150px;
+    height: 150px;
     object-fit: contain;
 }
 
@@ -79,6 +100,9 @@ body {
     background: #edf0ff;
     color: #4f63e8;
 }
+
+
+/* ======== USER BOX (Avatar + Infos) ============ */
 
 .user-box {
     display: flex;
@@ -118,6 +142,9 @@ body {
     line-height: 1.2;
 }
 
+
+/* ======== BARRE DE RECHERCHE & FILTRES ========== */
+
 .top-bar {
     display: flex;
     gap: 20px;
@@ -151,6 +178,9 @@ body {
     cursor: pointer;
 }
 
+
+/* ======== TITRES & CATEGORIES ========== */
+
 h1 {
     font-size: 32px;
     margin-bottom: 25px;
@@ -182,12 +212,16 @@ h1 {
     outline: 3px solid rgba(79, 99, 232, .25);
 }
 
+/* Couleurs des catégories */
 .green { background: #e9f9ef; color: #1f8f4d; }
 .blue { background: #4f63e8; color: white; }
 .yellow { background: #fff7d6; color: #b7791f; }
 .pink { background: #ffe8f1; color: #c02660; }
 .purple { background: #f1e8ff; color: #7c3aed; }
 .blue-light { background: #e8f2ff; color: #2563eb; }
+
+
+/* ========  CONTENU PRINCIPAL (Liste + Panel)  ========= */
 
 .content {
     display: grid;
@@ -202,6 +236,9 @@ h1 {
     gap: 25px;
     min-width: 0;
 }
+
+
+/* ======= CARTE D'ÉVÉNEMENT ========= */
 
 .event-card {
     background: white;
@@ -226,8 +263,6 @@ h1 {
     font-size: 24px;
     margin-bottom: 12px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .description {
@@ -260,6 +295,7 @@ h1 {
     margin-bottom: 14px;
 }
 
+/* Boutons */
 .event-btn,
 .secondary-btn,
 .danger-btn {
@@ -277,6 +313,9 @@ h1 {
 .secondary-btn { background: #16a34a; }
 .danger-btn { background: #ef4444; }
 .full { background: #fff1f2; color: #be123c; }
+
+
+/* ======== PANNEAU DROIT (Calendrier, Notifications) ========= */
 
 .right-panel {
     position: sticky;
@@ -309,6 +348,7 @@ h1 {
     gap: 10px;
 }
 
+/* Notification */
 .notification {
     position: relative;
     background: #ffffff;
@@ -341,6 +381,9 @@ h1 {
     display: none;
 }
 
+
+/* ====== MODE DÉTAIL (Affichage étendu) ======= */
+
 .container.detail-mode .sidebar {
     display: none;
 }
@@ -366,17 +409,14 @@ h1 {
     display: none;
 }
 
+
+/* ====== PANNEAU DÉTAIL (Images, Infos, Tabs) ======== */
+
 .side-detail-image {
     width: 100%;
     height: 170px;
     object-fit: cover;
-    border-radius: 18px 18px 0 0;
-}
-
-.details {
-    position: relative;
-    padding: 0 0 22px 0;
-    overflow: hidden;
+	border-radius: 24px;
 }
 
 .details h3 {
@@ -471,6 +511,9 @@ h1 {
     margin: 10px 22px 20px;
 }
 
+
+/* ===== CALENDRIER ======= */
+
 .calendar-top,
 .month {
     display: flex;
@@ -550,6 +593,9 @@ h1 {
     text-align: center;
 }
 
+
+/* ==== RESPONSIVE DESIGN ==== */
+
 @media (max-width: 1200px) {
     .container.detail-mode .content {
         grid-template-columns: minmax(0, 1fr) 280px 330px;
@@ -596,39 +642,6 @@ h1 {
     }
 }
 
-@media (max-width: 850px) {
-    .container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-    }
-
-    .menu {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .menu a {
-        margin-bottom: 0;
-    }
-
-    .top-bar {
-        flex-direction: column;
-    }
-
-    .event-card {
-        grid-template-columns: 1fr;
-    }
-
-    .event-side {
-        text-align: left;
-    }
-}
 </style>
 </head>
 
@@ -638,55 +651,55 @@ h1 {
 <aside class="sidebar">
     <div>
         <div class="logo">
-            <a href="accueil.php">
-                <img src="images/logo.jpeg" alt="Logo Off Campus">
-            </a>
+            <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
         </div>
 
-        <nav class="menu">
-            <a href="accueil.php">Accueil</a>
+       <nav class="menu">
+			<a href="accueil.php">Accueil</a>
 
-            <a href="activite.php" class="active">
-                Événements / Activités
-            </a>
+			<a href="activite.php" class="active">
+				Événements / Activités
+			</a>
 
-            <?php if ($role === "membre") : ?>
-                <a href="dashboard-membre.php">Tableau de bord</a>
-                <a href="evenement-membre.php">Créer un événement</a>
-            <?php else : ?>
-                <a href="jeux.php">Jeux</a>
-            <?php endif; ?>
+			<?php if ($role === "membre") : ?>
+				<a href="dashboard-membre.php">Tableau de bord</a>
+				<a href="evenement-membre.php">Créer un événement</a>
+			<?php else : ?>
+				<a href="jeux.php">Jeux</a>
+			<?php endif; ?>
 
-            <a href="reservation.html">Réservations</a>
-            <a href="#">Notifications</a>
-            <a href="a-propos.html">À propos</a>
-            <a href="profil.php">Mon compte</a>
+			<a href="reservations.php">Réservations</a>
+			<a href="notifications.php">Notifications</a>
+			<a href="a-propos.php">À propos</a>
+			<a href="profil.php">Mon compte</a>
 
-            <?php if ($role === "membre") : ?>
-                <a href="deconnexion.php">Déconnexion</a>
-            <?php endif; ?>
-        </nav>
+			<?php if ($role === "membre") : ?>
+				<a href="deconnexion.php">Déconnexion</a>
+			<?php endif; ?>
+		</nav>
     </div>
 
-    <div class="user-box" onclick="window.location.href='profil.php'">
-        <div class="avatar">
-            <?php echo strtoupper(substr($_SESSION["surname"] ?? "N", 0, 1)); ?>
-        </div>
+    <div class="user-box" onclick="window.location.href='profil.php'" style="cursor:pointer;">
+    
+		<div class="avatar">
+			<?php echo strtoupper(substr($_SESSION["surname"] ?? "N", 0, 1)); ?>
+		</div>
 
-        <div>
-            <strong>
-                <?php echo htmlspecialchars($_SESSION["surname"] ?? "Nina"); ?>
-            </strong>
+		<div>
+			<strong>
+				<?php echo htmlspecialchars($_SESSION["surname"] ?? "Nina"); ?>
+			</strong>
 
-            <p id="roleText">
-                <?php
-                    echo ($_SESSION["role"] ?? "etudiant") === "membre"
-                        ? "Membre association"
-                        : "Étudiant";
-                ?>
-            </p>
-        </div>
-    </div>
+			<p id="roleText">
+				<?php
+					echo ($_SESSION["role"] ?? "etudiant") === "membre"
+						? "Membre association"
+						: "Étudiant";
+				?>
+			</p>
+		</div>
+
+	</div>
 </aside>
 
 <main class="main">
@@ -695,13 +708,12 @@ h1 {
         <div class="search-bar">
             <input id="searchInput" type="text" placeholder="🔍 Rechercher un événement, une activité, un lieu...">
         </div>
-
         <select class="filter-btn" id="sortSelect" onchange="sortEvents()">
-            <option value="">Trier</option>
-            <option value="theme">Par thème</option>
-            <option value="date">Par date</option>
-            <option value="places">Par places disponibles</option>
-        </select>
+			<option value="">Trier</option>
+			<option value="theme">Par thème</option>
+			<option value="date">Par date</option>
+			<option value="places">Par places disponibles</option>
+		</select>
     </div>
 
     <h1>Événements à venir</h1>
@@ -712,7 +724,6 @@ h1 {
         <button class="category yellow" data-filter="Tournois">🏆 Tournois</button>
         <button class="category pink" data-filter="Ateliers">🎨 Ateliers</button>
         <button class="category purple" data-filter="Culture">🎭 Culture</button>
-        <button class="category blue-light" data-filter="Sport">⚽ Sport</button>
         <button class="category blue-light" data-filter="Récurrents">🔄 Récurrents</button>
     </div>
 
@@ -727,26 +738,50 @@ h1 {
                 </div>
 
                 <div class="month">
-                    <span class="arrow" onclick="previousMonth()">‹</span>
-                    <span id="calendarTitle"></span>
-                    <span class="arrow" onclick="nextMonth()">›</span>
-                </div>
+					<span class="arrow" onclick="previousMonth()">‹</span>
+					<span id="calendarTitle"></span>
+					<span class="arrow" onclick="nextMonth()">›</span>
+				</div>
 
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
+			
 
             <div class="notifications">
-                <h3>Notifications</h3>
+				<h3>Notifications</h3>
 
-                <div id="notificationsList">
-                    <div class="notification unread" onclick="markAsRead(this)">
-                        <p>Bienvenue sur Off Campus.</p>
-                    </div>
-                </div>
-            </div>
+				<div id="notificationsList">
+
+					<?php if (empty($latestNotifications)) : ?>
+
+						<div class="notification unread">
+							<p>Vous êtes à jour.</p>
+						</div>
+
+					<?php else : ?>
+
+						<?php foreach ($latestNotifications as $notif) : ?>
+
+							<div class="notification <?php echo $notif["is_read"] ? "read" : "unread"; ?>"
+								onclick="markAsRead(this)"
+
+								<p>
+									<strong><?php echo htmlspecialchars($notif["title"]); ?></strong><br>
+									<?php echo htmlspecialchars($notif["message"]); ?>
+								</p>
+
+							</div>
+
+						<?php endforeach; ?>
+
+					<?php endif; ?>
+
+				</div>
+			</div>
         </aside>
-
-        <div class="details" id="detailsBox"></div>
+		
+		<div class="details" id="detailsBox"></div>
+		
     </section>
 
 </main>
@@ -758,93 +793,207 @@ const IS_CONNECTED = <?php echo $isConnected ? "true" : "false"; ?>;
 
 let selectedFilter = "Tous";
 let selectedDay = null;
-let events = [];
 
-const API_URL = "events_api.php";
+const events = [
+    {
+        id: 1,
+        title: "Soirée jeux de société",
+		
+        category: "Soirées jeux",
+        image: "Jeu de societe.jpg",
+		
+        description: "Venez découvrir et jouer à des jeux de société dans une ambiance conviviale.",
+		
+        date: "Vendredi 16 mai 2026",
+        day: 16,
+		
+		fullDate: "2026-05-16",
+		
+        time: "18h00 - 22h00",
+        place: "Salle polyvalente",
+		
+        capacity: 30,
+        registered: 18,
+		
+        status: "Ouvert",
+        joined: false,
+        waiting: false
+    },
+    {
+        id: 2,
+        title: "Tournoi Mario Kart",
+		
+        category: "Tournois",
+        image: "Mario.jpg",
+		
+        description: "Affrontez les autres étudiants dans un tournoi fun et compétitif.",
+		
+        date: "Samedi 24 mai 2026",
+        day: 24,
+		
+		fullDate: "2026-05-24",
+		
+        time: "14h00 - 17h00",
+        place: "Espace détente",
+		
+        capacity: 20,
+        registered: 20,
+		
+        status: "Complet",
+        joined: false,
+        waiting: false
+    },
+    {
+        id: 3,
+        title: "Atelier peinture",
+		
+        category: "Ateliers",
+        image: "Peinture.jpg",
+		
+        description: "Un atelier créatif ouvert à tous pour découvrir la peinture et partager un moment calme.",
+		
+        date: "Mercredi 28 mai 2026",
+        day: 28,
+		
+		fullDate: "2026-05-28",
+		
+        time: "15h00 - 17h00",
+        place: "Salle créativité",
+		
+        capacity: 15,
+        registered: 8,
+		
+        status: "Ouvert",
+        joined: false,
+        waiting: false
+    },
+	{
+		id: 4,
+		title: "Soirée musique live",
+		
+		category: "Culture",
+		image: "Musique.png",
+		
+		description: "Une soirée live avec des groupes étudiants et des invités surprises.",
+		
+		date: "Vendredi 6 juin 2026",
+		day: 6,
+		
+		fullDate: "2026-06-06",
+		
+		time: "19h00 - 23h00",
+		place: "Amphithéâtre",
+		
+		capacity: 80,
+		registered: 45,
+		
+		status: "Ouvert",
+		joined: false,
+		waiting: false
+	},
+	{
+		id: 5,
+		title: "Tournoi d’échecs",
+
+		fullDate: "2026-06-10",
+
+		category: "Tournois",
+		image: "Echecs.png",
+
+		description: "Affrontez les meilleurs joueurs de l’école dans un tournoi stratégique.",
+
+		date: "Mercredi 10 juin 2026",
+		day: 10,
+
+		time: "14h00 - 18h00",
+		place: "Bibliothèque",
+
+		capacity: 24,
+		registered: 17,
+
+		status: "Ouvert",
+		joined: false,
+		waiting: false
+	},
+
+	{
+		id: 6,
+		title: "Cinéma plein air",
+
+		fullDate: "2026-06-14",
+
+		category: "Culture",
+		image: "Cinema.png",
+
+		description: "Projection d’un film en extérieur avec snacks et ambiance chill.",
+
+		date: "Dimanche 14 juin 2026",
+		day: 14,
+
+		time: "21h00 - 00h00",
+		place: "Cour centrale",
+
+		capacity: 120,
+		registered: 89,
+
+		status: "Ouvert",
+		joined: false,
+		waiting: false
+	},
+
+	{
+		id: 7,
+		title: "Atelier cuisine du monde",
+
+		fullDate: "2026-06-20",
+
+		category: "Ateliers",
+		image: "Cuisine.png",
+
+		description: "Découvrez plusieurs recettes internationales avec les associations étudiantes.",
+
+		date: "Samedi 20 juin 2026",
+		day: 20,
+
+		time: "12h00 - 15h00",
+		place: "Cafétéria",
+
+		capacity: 20,
+		registered: 20,
+
+		status: "Complet",
+		joined: false,
+		waiting: false
+	},
+
+	{
+		id: 8,
+		title: "Olympiades étudiantes",
+
+		fullDate: "2026-06-27",
+
+		category: "Tournois",
+		image: "Olympiade.png",
+
+		description: "Une journée sportive avec défis, équipes et récompenses à gagner.",
+
+		date: "Samedi 27 juin 2026",
+		day: 27,
+
+		time: "10h00 - 18h00",
+		place: "Terrain multisport",
+
+		capacity: 100,
+		registered: 64,
+
+		status: "Ouvert",
+		joined: false,
+		waiting: false
+	}
+];
 
 document.getElementById("roleText").textContent =
     USER_ROLE === "membre" ? "Membre association" : "Étudiant";
-
-function parseLocalDate(dateString) {
-    if (!dateString) {
-        return new Date();
-    }
-
-    const parts = dateString.split("-");
-    return new Date(parts[0], parts[1] - 1, parts[2]);
-}
-
-function formatLongDate(dateString) {
-    const date = parseLocalDate(dateString);
-
-    const jours = [
-        "Dimanche", "Lundi", "Mardi", "Mercredi",
-        "Jeudi", "Vendredi", "Samedi"
-    ];
-
-    const mois = [
-        "janvier", "février", "mars", "avril", "mai", "juin",
-        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
-    ];
-
-    return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function getEventImage(event) {
-    if (event.image && event.image.trim() !== "") {
-        return event.image;
-    }
-
-    return "Jeu de societe.jpg";
-}
-
-function convertApiEvent(event) {
-    const eventDate = parseLocalDate(event.event_date);
-
-    return {
-        id: Number(event.id),
-        title: event.name || "Événement sans nom",
-        category: event.category || "Autre",
-        image: getEventImage(event),
-        description: event.description || "",
-        date: formatLongDate(event.event_date),
-        day: eventDate.getDate(),
-        fullDate: event.event_date,
-        time: event.event_time || "Horaire non précisé",
-        place: event.place || "Lieu non précisé",
-        capacity: Number(event.capacity || 0),
-        registered: Number(event.registered || 0),
-        status: event.status || "Ouvert",
-        joined: false,
-        waiting: false
-    };
-}
-
-async function loadEvents() {
-    try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-
-        if (!data.success) {
-            document.getElementById("eventsList").innerHTML = `
-                <div class="empty">Impossible de charger les événements.</div>
-            `;
-            return;
-        }
-
-        events = data.events.map(convertApiEvent);
-
-        renderEvents();
-        renderCalendar();
-
-    } catch (error) {
-        document.getElementById("eventsList").innerHTML = `
-            <div class="empty">
-                Erreur serveur. Vérifie que WampServer est lancé et que tu ouvres la page avec localhost.
-            </div>
-        `;
-    }
-}
 
 function renderEvents() {
     const list = document.getElementById("eventsList");
@@ -873,8 +1022,7 @@ function renderEvents() {
     }
 
     filtered.forEach(event => {
-        const isFull = event.registered >= event.capacity && event.capacity > 0;
-
+        const isFull = event.registered >= event.capacity;
         const card = document.createElement("article");
         card.className = "event-card";
 
@@ -935,22 +1083,18 @@ function memberButton(event) {
     if (USER_ROLE !== "membre") return "";
 
     return `
-        <button class="secondary-btn" onclick="window.location.href='evenement-membre.php'">Gérer</button>
+        <button class="secondary-btn" onclick="editEvent(${event.id})">Modifier</button>
         <button class="danger-btn" onclick="cancelEvent(${event.id})">Annuler</button>
     `;
 }
 
 function showDetails(id) {
-    document.querySelector(".container").classList.add("detail-mode");
-
+	document.querySelector(".container").classList.add("detail-mode");
     const event = events.find(e => e.id === id);
-
-    if (!event) return;
-
-    const isFull = event.registered >= event.capacity && event.capacity > 0;
+    const isFull = event.registered >= event.capacity;
 
     document.getElementById("detailsBox").innerHTML = `
-        <button class="detail-back-btn" onclick="closeDetails()">←</button>
+		<button class="detail-back-btn" onclick="closeDetails()">←</button>
         <button class="close-detail" onclick="closeDetails()">×</button>
 
         <img src="images/${event.image}" alt="${event.title}" class="side-detail-image">
@@ -1003,6 +1147,13 @@ function joinEvent(id) {
     if (event.registered < event.capacity && !event.joined) {
         event.registered++;
         event.joined = true;
+		fetch("add-event-notification.php", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			body: "title=" + encodeURIComponent(event.title)
+		});
         addNotification(`Inscription confirmée : ${event.title}`);
     }
 
@@ -1022,7 +1173,7 @@ function leaveEvent(id) {
 
     renderEvents();
     renderCalendar();
-    showDetails(id);
+    closeDetails();
 }
 
 function joinWaitingList(id) {
@@ -1046,35 +1197,31 @@ function leaveWaitingList(id) {
     showDetails(id);
 }
 
-async function cancelEvent(id) {
+function editEvent(id) {
+    const event = events.find(e => e.id === id);
+    const newTitle = prompt("Nouveau titre :", event.title);
+
+    if (newTitle && newTitle.trim() !== "") {
+        event.title = newTitle;
+        addNotification(`Événement modifié : ${event.title}`);
+        renderEvents();
+        showDetails(id);
+    }
+}
+
+function cancelEvent(id) {
     const event = events.find(e => e.id === id);
 
-    if (!event) return;
-
-    if (!confirm("Voulez-vous vraiment annuler cet événement ?")) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}?id=${id}`, {
-            method: "DELETE"
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            addNotification(`Événement annulé : ${event.title}`);
-            await loadEvents();
-
-            document.getElementById("detailsBox").innerHTML = `
-                <h3>Détail événement</h3>
-                <p>L'événement a été annulé.</p>
-            `;
-        } else {
-            alert(data.message || "Impossible d'annuler cet événement.");
-        }
-    } catch (error) {
-        alert("Erreur de connexion avec le serveur PHP.");
+    if (confirm("Voulez-vous vraiment annuler cet événement ?")) {
+        event.status = "Annulé";
+        addNotification(`Événement annulé : ${event.title}`);
+        events.splice(events.indexOf(event), 1);
+        renderEvents();
+        renderCalendar();
+        document.getElementById("detailsBox").innerHTML = `
+            <h3>Détail événement</h3>
+            <p>L'événement a été annulé.</p>
+        `;
     }
 }
 
@@ -1083,12 +1230,14 @@ function addNotification(message) {
 
     const notif = document.createElement("div");
     notif.className = "notification unread";
-    notif.setAttribute("onclick", "markAsRead(this)");
+    notif.onclick = function () {
+        markAsRead(this);
+    };
 
     notif.innerHTML = `<p>${message}</p>`;
-
     list.prepend(notif);
 }
+
 
 function markAsRead(notification) {
     notification.classList.add("read");
@@ -1098,6 +1247,7 @@ let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
 function renderCalendar() {
+
     const grid = document.getElementById("calendarGrid");
 
     const monthNames = [
@@ -1133,23 +1283,23 @@ function renderCalendar() {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
+
         const button = document.createElement("button");
         button.textContent = day;
+		
+		const today = new Date();
 
-        const today = new Date();
+		const isToday =
+			day === today.getDate() &&
+			currentMonth === today.getMonth() &&
+			currentYear === today.getFullYear();
 
-        const isToday =
-            day === today.getDate() &&
-            currentMonth === today.getMonth() &&
-            currentYear === today.getFullYear();
-
-        if (isToday) {
-            button.classList.add("today-day");
-        }
+		if (isToday) {
+			button.classList.add("today-day");
+		}
 
         const hasEvent = events.some(event => {
-            const eventDate = parseLocalDate(event.fullDate);
-
+            const eventDate = new Date(event.fullDate);
             return (
                 eventDate.getDate() === day &&
                 eventDate.getMonth() === currentMonth &&
@@ -1158,7 +1308,7 @@ function renderCalendar() {
         });
 
         const hasReservation = events.some(event => {
-            const eventDate = parseLocalDate(event.fullDate);
+            const eventDate = new Date(event.fullDate);
 
             return (
                 event.joined &&
@@ -1168,20 +1318,20 @@ function renderCalendar() {
             );
         });
 
-        if (hasEvent) {
+        if (hasEvent)
             button.classList.add("event-dot");
-        }
 
-        if (hasReservation) {
+        if (hasReservation)
             button.classList.add("reserved-day");
-        }
-
-        if (selectedDay === day) {
-            button.classList.add("selected-day");
-        }
+			
+		if (selectedDay === day) {
+			button.classList.add("selected-day");
+		}
 
         button.onclick = () => {
+
             selectedDay = day;
+
             renderCalendar();
             renderEvents();
         };
@@ -1191,6 +1341,7 @@ function renderCalendar() {
 }
 
 function previousMonth() {
+
     currentMonth--;
 
     if (currentMonth < 0) {
@@ -1202,6 +1353,7 @@ function previousMonth() {
 }
 
 function nextMonth() {
+
     currentMonth++;
 
     if (currentMonth > 11) {
@@ -1243,7 +1395,7 @@ function sortEvents() {
     }
 
     if (sortValue === "date") {
-        events.sort((a, b) => parseLocalDate(a.fullDate) - parseLocalDate(b.fullDate));
+        events.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
     }
 
     if (sortValue === "places") {
@@ -1258,7 +1410,8 @@ function sortEvents() {
     renderCalendar();
 }
 
-loadEvents();
+renderEvents();
+renderCalendar();
 </script>
 
 </body>

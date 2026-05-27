@@ -534,9 +534,9 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <a href="jeux.php">Jeux</a>
 
-        <a href="reservations.html">Réservations</a>
+        <a href="reservations.php">Réservations</a>
 
-        <a href="communaute.html">Communauté</a>
+        <a href="communaute.php">Communauté</a>
 
         <a href="#">Mon Compte</a>
 
@@ -565,7 +565,7 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 					Explorer les activités
 				</a>
 
-                <a href="communaute.html" class="secondary-btn">
+                <a href="communaute.php" class="secondary-btn">
                     Découvrir la communauté
                 </a>
 
@@ -618,7 +618,7 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </p>
 
             <button>
-                <a href="communaute.html">Contacter</a>
+                <a href="communaute.php">Contacter</a>
             </button>
 
         </div>

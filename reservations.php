@@ -1,3 +1,11 @@
+<?php
+require_once "auth.php";
+requireLogin();
+
+$role = getRole();
+$isConnected = isConnected();
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
@@ -8,449 +16,552 @@
 
 		<style>
 
-		*{
-		  margin:0;
-		  padding:0;
-		  box-sizing:border-box;
-		  font-family:Arial, Helvetica, sans-serif;
+		/*  ======== RESET GLOBAL & BASE  ========== */
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: Arial, Helvetica, sans-serif;
 		}
 
-		body{
-		  background:#f5f5f7;
-		  display:flex;
-		  height:100vh;
-		  overflow:hidden;
+		body {
+			background: #f5f5f7;
+			display: flex;
+			height: 100vh;
+			overflow: hidden;
 		}
 
-		.sidebar{
-		  width:220px;
-		  background:white;
-		  border-right:1px solid #ddd;
-		  display:flex;
-		  flex-direction:column;
-		  justify-content:space-between;
-		  padding:20px 15px;
+
+		/*  ======== SIDEBAR  ========== */
+
+		.sidebar {
+			width: 230px;
+			height: 100vh;
+			position: sticky;
+			top: 0;
+			background: white;
+			padding: 30px 22px;
+			border-right: 1px solid #e5e7eb;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			flex-shrink: 0;
 		}
 
-		.logo{
-		  text-align:center;
-		  margin-bottom:30px;
+		.logo {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-bottom: 40px;
+			width: 100%;
 		}
 
-		.logo img{
-		  width:150px;
+		.logo img {
+			width: 150px;
+			height: 150px;
+			object-fit: contain;
 		}
 
-		.menu{
-		  display:flex;
-		  flex-direction:column;
-		  gap:8px;
+		.menu a {
+			display: block;
+			text-decoration: none;
+			color: #555;
+			padding: 12px 15px;
+			border-radius: 14px;
+			margin-bottom: 10px;
+			font-weight: 600;
 		}
 
-		.menu a{
-		  text-decoration:none;
-		  color:#444;
-		  padding:12px 14px;
-		  border-radius:12px;
-		  font-weight:600;
-		  transition:0.2s;
+		.menu a:hover,
+		.menu a.active {
+			background: #edf0ff;
+			color: #4f63e8;
 		}
 
-		.menu a:hover{
-		  background:#ece9ff;
+		.user-box {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			border-top: 1px solid #e5e7eb;
+			padding-top: 22px;
+			cursor: pointer;
 		}
 
-		.menu .active{
-		  background:#e7e4ff;
-		  color:#6a5cff;
+		.avatar {
+			width: 58px;
+			height: 58px;
+			border-radius: 50%;
+			background: #4f63e8;
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 22px;
+			font-weight: bold;
+			flex-shrink: 0;
 		}
 
-		.profile{
-		  border-top:1px solid #eee;
-		  padding-top:20px;
-		  display:flex;
-		  align-items:center;
-		  gap:12px;
+		.user-box strong {
+			font-size: 15px;
+			color: #15162b;
+			display: block;
+			line-height: 1.2;
 		}
 
-		.avatar{
-		  width:38px;
-		  height:38px;
-		  border-radius:50%;
-		  background:#6a5cff;
-		  color:white;
-		  display:flex;
-		  align-items:center;
-		  justify-content:center;
-		  font-weight:bold;
+		.user-box p {
+			font-size: 14px;
+			color: #555;
+			margin-top: 2px;
+			line-height: 1.2;
 		}
 
-		.main{
-		  flex:1;
-		  padding:25px;
-		  overflow-y:auto;
+
+		/*  ======== MAIN CONTENT  ========== */
+
+		.main {
+			flex: 1;
+			padding: 25px;
+			overflow-y: auto;
 		}
 
-		.topbar{
-		  display:flex;
-		  gap:15px;
-		  margin-bottom:25px;
+		.topbar {
+			display: flex;
+			gap: 15px;
+			margin-bottom: 25px;
 		}
 
-		.search-bar{
-		  flex:1;
+		/* ======== BARRE DE RECHERCHE & FILTRES ========== */
+
+		.top-bar {
+			display: flex;
+			gap: 20px;
+			margin-bottom: 30px;
 		}
 
-		.search-bar input{
-		  width:100%;
-		  padding:14px 18px;
-		  border:none;
-		  border-radius:15px;
-		  background:white;
-		  font-size:15px;
-		  outline:none;
-		  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+		.search-bar {
+			flex: 4;
 		}
 
-		.reset-btn{
-		  border:none;
-		  background:white;
-		  padding:0 22px;
-		  border-radius:15px;
-		  cursor:pointer;
-		  font-weight:600;
-		  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+		.search-bar input {
+			width: 100%;
+			height: 58px;
+			border: 1px solid #e1e4ef;
+			border-radius: 18px;
+			padding: 0 22px;
+			font-size: 16px;
+			background: white;
+			outline: none;
 		}
 
-		.content{
-		  display:flex;
-		  gap:30px;
+		.filter-btn {
+			height: 58px;
+			padding: 0 28px;
+			border: 1px solid #e1e4ef;
+			border-radius: 18px;
+			background: white;
+			color: #15162b;
+			font-weight: bold;
+			font-size: 16px;
+			cursor: pointer;
 		}
 
-		.left{
-		  flex:1;
+		/*  ======== CONTENT LAYOUT  ========== */
+
+		.content {
+			display: flex;
+			gap: 30px;
 		}
 
-		.title{
-		  font-size:56px;
-		  margin-bottom:20px;
+		.left {
+			flex: 1;
+		}
+
+
+		/*  ======== TITLE & FILTERS  ========== */
+
+		.title {
+			font-size: 56px;
+			margin-bottom: 20px;
 		}
 
 		.filters{
-		  display:flex;
-		  gap:15px;
-		  margin-bottom:20px;
-		  flex-wrap:wrap;
+			display:flex;
+			gap:16px;
+			margin:30px 0;
+			flex-wrap:wrap;
 		}
 
 		.filter-btn{
-		  padding:10px 22px;
-		  border-radius:12px;
-		  border:none;
-		  cursor:pointer;
-		  font-weight:600;
-		  transition:0.2s;
+			border:none;
+			background:#ffffff;
+			color:#1f1f39;
+			padding:16px 28px;
+			border-radius:22px;
+			font-size:20px;
+			font-weight:600;
+			cursor:pointer;
+			transition:0.25s ease;
+			box-shadow:0 2px 8px rgba(0,0,0,0.04);
 		}
 
 		.filter-btn:hover{
-		  transform:translateY(-2px);
+			transform:translateY(-2px);
+			background:#f5f5ff;
 		}
 
 		.filter-btn.active{
-		  transform:scale(1.05);
+			background:#e8e9ff;
+			color:#6366f1;
 		}
 
-		.all{
-		  background:#ffe5bf;
-		  border:1px solid #ff9f1c;
+		/* Filter colors */
+		.all {
+			background: #ffe5bf;
+			border: 1px solid #ff9f1c;
 		}
 
-
-		.salles{
-		  background:#ffd6d6;
-		  border:1px solid #ff7c7c;
+		.salles {
+			background: #ffd6d6;
+			border: 1px solid #ff7c7c;
 		}
 
-		.equipements{
-		  background:#dcffd8;
-		  border:1px solid #57cc4d;
+		.equipements {
+			background: #dcffd8;
+			border: 1px solid #57cc4d;
 		}
 
-		.outils{
-		  background:#eed9ff;
-		  border:1px solid #9d58d8;
+		.outils {
+			background: #eed9ff;
+			border: 1px solid #9d58d8;
 		}
 
-		.vehicules{
-		  background:#dbe8ff;
-		  border:1px solid #4b79ff;
+		.vehicules {
+			background: #dbe8ff;
+			border: 1px solid #4b79ff;
 		}
-
-		.cards-grid{
-		  display:grid;
-		  grid-template-columns:repeat(5, 1fr);
-		  gap:18px;
-		}
-
-		.card{
-		  background:white;
-		  border-radius:12px;
-		  overflow:hidden;
-		  border:2px solid transparent;
-		  transition:0.25s;
-		  cursor:pointer;
-		  box-shadow:0 2px 6px rgba(0,0,0,0.08);
-		}
-
-		.card:hover{
-		  transform:translateY(-3px);
-		}
-
-		.card.active{
-		  border:4px solid #000;
-		}
-
-		.card img{
-		  width:100%;
-		  height:170px;
-		  object-fit:cover;
-		}
-
-		.card-content{
-		  padding:12px;
-		}
-
-		.badge{
-		  display:inline-block;
-		  padding:4px 10px;
-		  border-radius:8px;
-		  font-size:12px;
-		  margin-bottom:12px;
-		}
-
-		.badge.salles{
-		  background:#ffd6d6;
-		  border:1px solid #ff7c7c;
-		}
-
-		.badge.equipements{
-		  background:#dcffd8;
-		  border:1px solid #57cc4d;
-		}
-
-		.badge.outils{
-		  background:#eed9ff;
-		  border:1px solid #9d58d8;
-		}
-
-		.badge.vehicules{
-		  background:#dbe8ff;
-		  border:1px solid #4b79ff;
-		}
-
-		.card-content h3{
-		  font-size:18px;
-		  line-height:1.3;
-		}
-
-		.details-panel{
-		  width:340px;
-		  background:white;
-		  border-radius:14px;
-		  overflow:hidden;
-		  box-shadow:0 2px 8px rgba(0,0,0,0.08);
-		  height:fit-content;
-		  position:sticky;
-		  top:220px;
-		  transform:translateX(80px);
-		  opacity:0;
-
-		  transition:
-			transform 0.45s ease,
-			opacity 0.45s ease;
-		}
-
-		.details-panel.show{
-		  transform:translateX(0);
-		  opacity:1;
-		}
-
-		.details-panel img{
-		  width:100%;
-		  height:240px;
-		  object-fit:cover;
-		}
-
-		.details-content{
-		  padding:20px;
-		}
-
-		.details-content h2{
-		  font-size:36px;
-		  margin-bottom:20px;
-		}
-
-		.details-content p{
-		  line-height:1.6;
-		  color:#444;
-		}
-
-		.reserve-btn{
-		  width:100%;
-		  margin-top:25px;
-		  padding:15px;
-		  border:none;
-		  border-radius:12px;
-		  background:#6a5cff;
-		  color:white;
-		  font-size:16px;
-		  font-weight:600;
-		  cursor:pointer;
-		  transition:0.2s;
-		}
-
-		.reserve-btn:hover{
-		  background:#5848f5;
-		  transform:translateY(-2px);
-		}
-
-		@media(max-width:1400px){
-
-		  .cards-grid{
-			grid-template-columns:repeat(4,1fr);
-		  }
-
-		}
-		.modal-overlay{
-
-		  position:fixed;
-		  inset:0;
-		  background:rgba(0,0,0,0.45);
-		  backdrop-filter:blur(6px);
-		  display:flex;
-		  justify-content:center;
-		  align-items:center;
-		  opacity:0;
-		  visibility:hidden;
-		  transition:0.3s;
-		  z-index:999;
-		}
-
-		.modal-overlay.show{
-
-		  opacity:1;
-		  visibility:visible;
-		}
-
-		.modal{
-
-		  width:500px;
-		  background:white;
-		  border-radius:24px;
-		  padding:35px;
-		  position:relative;
-		  transform:translateY(30px);
-		  transition:0.3s;
-		  box-shadow:
-			0 20px 50px rgba(0,0,0,0.2);
-		}
-
-		.modal-overlay.show .modal{
-
-		  transform:translateY(0);
-		}
-
-		.close-modal{
-
-		  position:absolute;
-		  top:18px;
-		  right:18px;
-		  width:38px;
-		  height:38px;
-		  border:none;
-		  border-radius:50%;
-		  background:#f3f4f6;
-		  cursor:pointer;
-		  font-size:18px;
-		  transition:0.2s;
-		}
-
-		.close-modal:hover{
-
-		  background:#e5e7eb;
-		  transform:rotate(90deg);
-		}
-
-		.modal h2{
-
-		  font-size:34px;
-		  margin-bottom:8px;
-		}
-
-		.modal-subtitle{
 		
-		  color:#6b7280;
-		  margin-bottom:30px;
+		.filters .category {
+			border: none;
+			padding: 10px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			font-size: 14px;
+			cursor: pointer;
+			transition: .2s;
 		}
 
-		.reservation-form{
-
-		  display:flex;
-		  flex-direction:column;
-		  gap:20px;
+		.filters .category:hover {
+			transform: translateY(-2px);
+			opacity: .9;
 		}
 
-		.form-group{
-
-		  display:flex;
-		  flex-direction:column;
-		  gap:8px;
+		.filters .category.active {
+			outline: 3px solid rgba(79, 99, 232, .25);
 		}
 
-		.form-group label{
+		.filters .green { background: #e9f9ef; color: #1f8f4d; }
+		.filters .blue { background: #4f63e8; color: white; }
+		.filters .yellow { background: #fff7d6; color: #b7791f; }
+		.filters .pink { background: #ffe8f1; color: #c02660; }
+		.filters .purple { background: #f1e8ff; color: #7c3aed; }
 
-		  font-weight:600;
-		  color:#374151;
+		/*  ======== CARDS GRID  ========== */
+
+		.cards-grid {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 18px;
+		}
+
+		.card {
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			border: 2px solid transparent;
+			transition: 0.25s;
+			cursor: pointer;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+		}
+
+		.card:hover {
+			transform: translateY(-3px);
+		}
+
+		.card.active {
+			border: 4px solid #b10f79;
+		}
+
+		.card img {
+			width: 100%;
+			height: 170px;
+			object-fit: cover;
+		}
+
+		.card-content {
+			padding: 12px;
+		}
+
+		.badge {
+			display: inline-block;
+			padding: 7px 12px;
+			border-radius: 14px;
+			font-size: 12px;
+			font-weight: 600;
+			text-align: center;
+			margin-bottom: 12px;
+			border: none;
+		}
+
+		.badge.salles {
+			background: #e9f9ef;
+			color: #1f8f4d;
+		}
+
+		.badge.equipements {
+			background: #fff7d6;
+			color: #b7791f;
+		}
+
+		.badge.outils {
+			background: #ffe8f1;
+			color: #c02660;
+		}
+
+		.badge.vehicules {
+			background: #f1e8ff;
+			color: #7c3aed;
+		}
+
+		.card-content h3 {
+			font-size: 18px;
+			line-height: 1.3;
+		}
+
+
+		/*  ======== DETAILS PANEL  ========== */
+
+		.details-panel {
+			width: 340px;
+			background: white;
+			border-radius: 14px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+			height: fit-content;
+			position: sticky;
+			top: 220px;
+
+			transform: translateX(80px);
+			opacity: 0;
+
+			transition: transform 0.45s ease, opacity 0.45s ease;
+		}
+
+		.details-panel.show {
+			transform: translateX(0);
+			opacity: 1;
+		}
+
+		.details-panel img {
+			width: 100%;
+			height: 240px;
+			object-fit: cover;
+		}
+
+		.details-content {
+			padding: 20px;
+		}
+
+		.details-content h2 {
+			font-size: 36px;
+			margin-bottom: 20px;
+		}
+
+		.details-content p {
+			line-height: 1.6;
+			color: #444;
+		}
+
+		.reserve-btn {
+			width: 100%;
+			margin-top: 25px;
+			padding: 15px;
+			border: none;
+			border-radius: 12px;
+			background: #6a5cff;
+			color: white;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.reserve-btn:hover {
+			background: #5848f5;
+			transform: translateY(-2px);
+		}
+
+
+		/*  ======== MODAL (OVERLAY + CONTENT)  ========== */
+
+		.modal-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0,0,0,0.45);
+			backdrop-filter: blur(6px);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			opacity: 0;
+			visibility: hidden;
+			transition: 0.3s;
+			z-index: 999;
+		}
+
+		.modal-overlay.show {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.modal {
+			width: 500px;
+			background: white;
+			border-radius: 24px;
+			padding: 35px;
+			position: relative;
+			transform: translateY(30px);
+			transition: 0.3s;
+			box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+		}
+
+		.modal-overlay.show .modal {
+			transform: translateY(0);
+		}
+
+		.close-modal {
+			position: absolute;
+			top: 18px;
+			right: 18px;
+			width: 38px;
+			height: 38px;
+			border: none;
+			border-radius: 50%;
+			background: #f3f4f6;
+			cursor: pointer;
+			font-size: 18px;
+			transition: 0.2s;
+		}
+
+		.close-modal:hover {
+			background: #e5e7eb;
+			transform: rotate(90deg);
+		}
+
+		.modal h2 {
+			font-size: 34px;
+			margin-bottom: 8px;
+		}
+
+		.modal-subtitle {
+			color: #6b7280;
+			margin-bottom: 30px;
+		}
+
+
+		/*  ======== RESERVATION FORM  ========== */
+
+		.reservation-form {
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.form-group {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.form-group label {
+			font-weight: 600;
+			color: #374151;
 		}
 
 		.form-group input,
-		.form-group textarea{
-
-		  padding:14px 16px;
-		  border:none;
-		  border-radius:14px;
-		  background:#f3f4f6;
-		  font-size:15px;
-		  outline:none;
-		  transition:0.2s;
+		.form-group textarea {
+			padding: 14px 16px;
+			border: none;
+			border-radius: 14px;
+			background: #f3f4f6;
+			font-size: 15px;
+			outline: none;
+			transition: 0.2s;
 		}
 
 		.form-group input:focus,
-		.form-group textarea:focus{
-
-		  background:white;
-		  box-shadow:
-			0 0 0 3px rgba(106,92,255,0.2);
+		.form-group textarea:focus {
+			background: white;
+			box-shadow: 0 0 0 3px rgba(106,92,255,0.2);
 		}
 
-		.confirm-btn{
-
-		  margin-top:10px;
-		  border:none;
-		  background:#6a5cff;
-		  color:white;
-		  padding:16px;
-		  border-radius:16px;
-		  font-size:16px;
-		  font-weight:700;
-		  cursor:pointer;
-		  transition:0.2s;
+		.confirm-btn {
+			margin-top: 10px;
+			border: none;
+			background: #6a5cff;
+			color: white;
+			padding: 16px;
+			border-radius: 16px;
+			font-size: 16px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: 0.2s;
 		}
 
-		.confirm-btn:hover{
+		.confirm-btn:hover {
+			background: #5848f5;
+			transform: translateY(-2px);
+		}
 
-		  background:#5848f5;
-		  transform:translateY(-2px);
+
+		/*  ======== RESPONSIVE  ========== */
+
+		@media(max-width:1400px) {
+			.cards-grid {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		@media(max-width:900px) {
+			.content {
+				flex-direction: column;
+			}
+
+			.details-panel {
+				width: 100%;
+			}
+
+			.cards-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@media(max-width:650px) {
+			.sidebar {
+				display: none;
+			}
+
+			.cards-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.title {
+				font-size: 34px;
+			}
+
+			.filters {
+				flex-direction: column;
+				align-items: flex-start;
+			}
 		}
 
 		</style>
@@ -458,54 +569,23 @@
 
 	<body>
 
-		<aside class="sidebar">
-
-		  <div>
-
-			<div class="logo">
-			  <img src="images/logo.jpeg">
-			</div>
-
-			<nav class="menu">
-			  <a href="accueil.php">Accueil</a>
-			  <a href="activite.php">Événements / Activités</a>
-			  <a href="jeux.php">Jeux</a>
-			  <a href="#" class="active">Réservations</a>
-			  <a href="#">Notifications</a>
-			  <a href="a-propos.html">À propos</a>
-			</nav>
-
-		  </div>
-
-		  <div class="profile">
-			<div class="avatar">N</div>
-
-			<div>
-			  <strong>Nina</strong><br>
-			  <span>Étudiante</span>
-			</div>
-		  </div>
-
-		</aside>
+		<?php include "sidebar.php"; ?>
 
 
 		<main class="main">
-
-		  <div class="topbar">
-
+			    
+		<div class="top-bar">
 			<div class="search-bar">
-			  <input 
-				type="text"
-				id="searchInput"
-				placeholder="🔍 Rechercher une salle, du matériel ..."
-			  >
+				<input id="searchInput" type="text" placeholder="🔍 Rechercher un événement, une activité, un lieu...">
 			</div>
+			<select class="filter-btn" id="sortSelect" onchange="sortEvents()">
+				<option value="">Trier</option>
+				<option value="theme">Par thème</option>
+				<option value="az">A → Z</option>
+				<option value="za">Z → A</option>
+			</select>
 
-			<button class="reset-btn" onclick="resetAll()">
-			  Réinitialiser
-			</button>
-
-		  </div>
+		</div>
 
 		  <div class="content">
 
@@ -513,29 +593,13 @@
 
 			  <h1 class="title">Réservations</h1>
 
-			  <div class="filters">
-
-				<button class="filter-btn all active" data-filter="all">
-				  Toutes
-				</button>
-
-				<button class="filter-btn salles" data-filter="salles">
-				  Salles
-				</button>
-
-				<button class="filter-btn equipements" data-filter="equipements">
-				  Gros équipements
-				</button>
-
-				<button class="filter-btn outils" data-filter="outils">
-				  Outils / Matériel
-				</button>
-
-				<button class="filter-btn vehicules" data-filter="vehicules">
-				  Véhicules
-				</button>
-
-			  </div>
+			<div class="filters">
+				<button class="category blue active" data-filter="all">⌘ Toutes</button>
+				<button class="category green" data-filter="salles">🏠 Salles</button>
+				<button class="category yellow" data-filter="equipements">🏆 Gros équipements</button>
+				<button class="category pink" data-filter="outils">🛠️ Outils / Matériel</button>
+				<button class="category purple" data-filter="vehicules">🚐 Véhicules</button>
+			</div>
 
 			  <div class="cards-grid">
 
@@ -798,7 +862,7 @@
 		};
 
 		const cards = document.querySelectorAll(".card");
-		const filterButtons = document.querySelectorAll(".filter-btn");
+		const filterButtons = document.querySelectorAll(".filters .category");
 		const searchInput = document.getElementById("searchInput");
 
 		const detailsTitle = document.getElementById("detailsTitle");

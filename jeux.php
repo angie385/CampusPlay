@@ -1,6 +1,7 @@
 <?php
 require_once "auth.php";
 require_once "db.php";
+require_once "notification_helper.php";
 
 $isConnected = isConnected();
 $role = getRole();
@@ -42,16 +43,25 @@ if (
         );
 
         $stmt = $pdo->prepare("
-            INSERT INTO game_reservations
-            (user_id, game_id, return_date)
-            VALUES (?, ?, ?)
-        ");
+			INSERT INTO game_reservations
+			(user_id, game_id, return_date)
+			VALUES (?, ?, ?)
+		");
 
         $stmt->execute([
             $userId,
             $gameId,
             $returnDate
         ]);
+		
+		addNotification(
+			$pdo,
+			$userId,
+			"Jeu emprunté",
+			"Votre demande a bien été prise en compte. Le jeu " . $game["name"] . " est à rendre sous 3 jours sous peine de pénalité.",
+			"warning",
+			"jeux.php"
+		);
 
         $stmt = $pdo->prepare("
             UPDATE games
@@ -110,81 +120,84 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		/*  ======== SIDEBAR  ========== */
 
 		.sidebar {
-			width: 220px;
+			width: 230px;
+			height: 100vh;
+			position: sticky;
+			top: 0;
 			background: white;
-			border-right: 1px solid #ddd;
+			padding: 30px 22px;
+			border-right: 1px solid #e5e7eb;
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
-			padding: 20px 15px;
+			flex-shrink: 0;
 		}
 
 		.logo {
-			text-align: center;
-			margin-bottom: 30px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-bottom: 40px;
+			width: 100%;
 		}
 
 		.logo img {
 			width: 150px;
-			margin-bottom: 10px;
-		}
-
-		.menu {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
+			height: 150px;
+			object-fit: contain;
 		}
 
 		.menu a {
+			display: block;
 			text-decoration: none;
-			color: #444;
-			padding: 12px 14px;
-			border-radius: 12px;
+			color: #555;
+			padding: 12px 15px;
+			border-radius: 14px;
+			margin-bottom: 10px;
 			font-weight: 600;
-			transition: 0.2s;
 		}
 
-		.menu a:hover {
-			background: #ece9ff;
+		.menu a:hover,
+		.menu a.active {
+			background: #edf0ff;
+			color: #4f63e8;
 		}
 
-		.menu .active {
-			background: #e7e4ff;
-			color: #6a5cff;
-		}
-
-		.profile {
-			border-top: 1px solid #eee;
-			padding-top: 20px;
+		.user-box {
 			display: flex;
 			align-items: center;
 			gap: 12px;
+			border-top: 1px solid #e5e7eb;
+			padding-top: 22px;
+			cursor: pointer;
 		}
 
 		.avatar {
-			width: 38px;
-			height: 38px;
+			width: 58px;
+			height: 58px;
 			border-radius: 50%;
-			background: #6a5cff;
+			background: #4f63e8;
 			color: white;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			font-size: 22px;
 			font-weight: bold;
+			flex-shrink: 0;
 		}
 
-		.profile-info {
+		.user-box strong {
+			font-size: 15px;
+			color: #15162b;
+			display: block;
+			line-height: 1.2;
+		}
+
+		.user-box p {
 			font-size: 14px;
-		}
-
-		.profile-info span {
-			color: #888;
-			font-size: 12px;
-		}
-
-		.profile {
-			text-decoration: none;
-			color: inherit;
+			color: #555;
+			margin-top: 2px;
+			line-height: 1.2;
 		}
 
 
@@ -203,39 +216,40 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		}
 
 
-		/*  ======== SEARCH BAR & RESET BUTTON  ========== */
+		/* ======== BARRE DE RECHERCHE & FILTRES ========== */
+
+		.top-bar {
+			display: flex;
+			gap: 20px;
+			margin-bottom: 30px;
+		}
 
 		.search-bar {
-			flex: 1;
-			position: relative;
+			flex: 4;
 		}
 
 		.search-bar input {
 			width: 100%;
-			padding: 14px 18px;
-			border: none;
-			border-radius: 15px;
-			background: white;
-			font-size: 15px;
-			outline: none;
-			box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-		}
-
-		.reset-btn {
-			border: none;
-			background: white;
+			height: 58px;
+			border: 1px solid #e1e4ef;
+			border-radius: 18px;
 			padding: 0 22px;
-			border-radius: 15px;
+			font-size: 16px;
+			background: white;
+			outline: none;
+		}
+
+		.filter-btn {
+			height: 58px;
+			padding: 0 28px;
+			border: 1px solid #e1e4ef;
+			border-radius: 18px;
+			background: white;
+			color: #15162b;
+			font-weight: bold;
+			font-size: 16px;
 			cursor: pointer;
-			font-weight: 600;
-			box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-			transition: 0.2s;
 		}
-
-		.reset-btn:hover {
-			background: #efefef;
-		}
-
 
 		/*  ======== CONTENT LAYOUT  ========== */
 
@@ -251,23 +265,16 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		/*  ======== TITLE & SORTING  ========== */
 
-		.title {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
+		h1 {
+			font-size: 32px;
 			margin-bottom: 25px;
 		}
 
-		.title h1 {
-			font-size: 46px;
-			padding-bottom: 20px;
-			padding-top: 15px;
-		}
-
-		.title p {
+		p {
 			font-style: italic;
 			font-size: 22px;
 			color: #333;
+			margin-bottom: 25px
 		}
 
 		#sortSelect {
@@ -306,7 +313,7 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		}
 
 		.game-card.active {
-			border: 4px solid #000;
+			border: 4px solid #ecce1f;
 			transform: translateY(-2px);
 		}
 
@@ -493,95 +500,46 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 
-  <aside class="sidebar">
-
-    <div>
-      <div class="logo">
-        <img src="images/logo.jpeg" alt="Logo">
-      </div>
-
-      <nav class="menu">
-        <a href="accueil.php">Accueil</a>
-        <a href="activite.php">Événements / Activités</a>
-        <a href="jeux.php" class="active">Jeux</a>
-        <a href="reservations.html">Réservations</a>
-        <a href="notification.html">Notifications</a>
-        <a href="a-propos.html">À propos</a>
-      </nav>
-    </div>
-
-    <a href="profil.php" class="profile">
-		<div class="avatar">
-			<?php echo $initial; ?>
-		</div>
-
-		<div class="profile-info">
-			<strong><?php echo htmlspecialchars($surname ?: $name); ?></strong><br>
-			<span><?php echo $role === "membre" ? "Membre association" : "Étudiant"; ?></span>
-		</div>
-	</a>
-
-  </aside>
+  <?php include "sidebar.php"; ?>
 
 
   <main class="main">
 
-    <div class="topbar">
-
-      <div class="search-bar">
-        <input 
-          type="text" 
-          id="searchInput"
-          placeholder="🔍 Rechercher un jeu"
-        >
-      </div>
-
-      <button class="reset-btn" onclick="resetSearch()">
-        Réinitialiser
-      </button>
-
-    </div>
-
-
-    <div class="content">
-
-      <section class="games-section">
-
-        <div class="title">
-
-		  <div>
-			<h1>Jeux à emprunter</h1>
-
-			<p>
-			  Ces jeux vous sont proposés par l'association CPGames
-			</p>
-		  </div>
-
-		  <select id="sortSelect">
-
-		    <option value="default">
-			  Trier par
+    <div class="top-bar">
+		<div class="search-bar">
+			<input id="searchInput" type="text" placeholder="🔍 Rechercher un événement, une activité, un lieu...">
+		</div>
+		<select class="filter-btn" id="sortSelect" onchange="sortEvents()">
+			<option value="default">
+				Trier par
 			</option>
 
 			<option value="az">
-			  A → Z
+				A → Z
 			</option>
 
 			<option value="za">
-			  Z → A
+				Z → A
 			</option>
 
 			<option value="dureemin">
-			  Temps minimum
+				Temps minimum
 			</option>
 
 			<option value="persomin">
-			  Nombre de joueurs minimum
+				Nombre de joueurs minimum
 			</option>
+		</select>
 
-		  </select>
+    </div>
 
-		</div>
+	<h1>Jeux à emprunter</h1>
+	
+	<p> Ces jeux vous sont proposés par l'association CPGames </p>
+	
+    <div class="content">
+
+      <section class="games-section">
 		
 		<?php if (!empty($message)) : ?>
 
@@ -727,7 +685,7 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	gameCards.forEach(card => {
 
-	  card.addEventListener("click", () => {
+		card.addEventListener("click", () => {
 		
 		detailsPanel.classList.remove("show");
 		gameCards.forEach(c => c.classList.remove("active"));
@@ -735,6 +693,9 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		card.classList.add("active");
 
 		const title = card.dataset.title;
+		
+		detailsDescription.innerHTML = card.dataset.description;
+		detailsImage.src = card.dataset.image;
 
 		detailsTitle.textContent = title;
 
@@ -748,6 +709,10 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	});
 
 	gameCards[0].classList.add("active");
+	
+	detailsTitle.textContent = gameCards[0].dataset.title;
+	detailsDescription.innerHTML = gameCards[0].dataset.description;
+	detailsImage.src = gameCards[0].dataset.image;
 	
 	updateReserveButton(gameCards[0]);
 	

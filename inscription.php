@@ -390,7 +390,7 @@ body{
 
         <div class="brand">
 
-            <a href = "accueil.html"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
+            <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
 
             <h1>Rejoignez <span>OffCampus</span></h1>
 
