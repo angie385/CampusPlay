@@ -20,8 +20,18 @@ function requireLogin() {
 
 function requireMember() {
     requireLogin();
+
     if (getRole() !== "membre") {
         header("Location: activite.php");
+        exit;
+    }
+}
+
+function requireAdmin() {
+    requireLogin();
+
+    if (getRole() !== "admin") {
+        header("Location: accueil.php");
         exit;
     }
 }
