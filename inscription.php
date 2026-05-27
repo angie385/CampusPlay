@@ -436,7 +436,7 @@ body{
         <div class="register-card">
 
             <div class="top-links">
-                <a href="accueil.html">Accueil</a>
+                <a href="accueil.php">Accueil</a>
                 <a href="activite.php">Activités</a>
                 <a href="connexion.php">Connexion</a>
             </div>
