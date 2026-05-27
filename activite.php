@@ -659,7 +659,7 @@ h1 {
 
             <a href="reservation.html">Réservations</a>
             <a href="#">Notifications</a>
-            <a href="#">À propos</a>
+            <a href="a-propos.html">À propos</a>
             <a href="profil.php">Mon compte</a>
 
             <?php if ($role === "membre") : ?>

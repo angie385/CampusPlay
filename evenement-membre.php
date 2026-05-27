@@ -524,7 +524,7 @@ textarea:focus {
                     <a href="evenement-membre.php" class="active">Créer un événement</a>
                     <a href="#">Réservations</a>
                     <a href="#">Notifications</a>
-                    <a href="#">À propos</a>
+                    <a href="a-propos.html">À propos</a>
                     <a href="profil.php">Mon compte</a>
                 </nav>
             </div>

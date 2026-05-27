@@ -505,7 +505,7 @@ body {
 
 					<a href="reservations.html">Réservations</a>
 					<a href="#">Notifications</a>
-					<a href="#">À propos</a>
+					<a href="a-propos.html">À propos</a>
 					<a href="profil.php" class="active">Mon compte</a>
 				</nav>
 			</div>

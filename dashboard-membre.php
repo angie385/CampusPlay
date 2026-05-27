@@ -435,7 +435,7 @@ body {
 					<a href="evenement-membre.php">Créer un événement</a>
 					<a href="reservations.html">Réservations</a>
 					<a href="#">Notifications</a>
-					<a href="#">À propos</a>
+					<a href="a-propos.html">À propos</a>
 					<a href="profil.php">Mon compte</a>
 				</nav>
             </div>
