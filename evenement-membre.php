@@ -530,7 +530,7 @@ textarea:focus {
                     </p>
                 </div>
 
-                <a href="dashboard-membre.html" class="btn btn-blue">Retour au tableau de bord</a>
+                <a href="dashboard-membre.php" class="btn btn-blue">Retour au tableau de bord</a>
             </section>
 
             <section class="content">

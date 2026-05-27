@@ -1,3 +1,23 @@
+<?php
+require_once "auth.php";
+require_once "db.php";
+
+$isConnected = isConnected();
+$role = getRole();
+
+$name = $_SESSION["name"] ?? "Utilisateur";
+$surname = $_SESSION["surname"] ?? "";
+$initial = strtoupper(substr($surname ?: $name, 0, 1));
+
+$stmt = $pdo->query("
+    SELECT *
+    FROM games
+    ORDER BY name ASC
+");
+
+$games = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -358,8 +378,8 @@
       </div>
 
       <nav class="menu">
-        <a href="accueil.html">Accueil</a>
-        <a href="activite.html">Événements / Activités</a>
+        <a href="accueil.php">Accueil</a>
+        <a href="activite.php">Événements / Activités</a>
         <a href="jeux.html" class="active">Jeux</a>
         <a href="reservations.html">Réservations</a>
         <a href="notification.html">Notifications</a>

@@ -23,3 +23,91 @@ CREATE TABLE users (
     gender VARCHAR(20)
 
 );
+
+
+CREATE TABLE events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    category VARCHAR(100),
+    event_date DATE NOT NULL,
+    event_time VARCHAR(50),
+    place VARCHAR(150),
+    capacity INT DEFAULT 0,
+    registered INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'Ouvert',
+    resource VARCHAR(150),
+    description TEXT,
+    image VARCHAR(150)
+);
+
+
+
+INSERT INTO events 
+(name, category, event_date, event_time, place, capacity, registered, status, description, image)
+VALUES
+('Soirée jeux de société', 'Soirées jeux', '2026-05-16', '18h00 - 22h00', 'Salle polyvalente', 30, 18, 'Ouvert', 'Venez découvrir et jouer à des jeux de société dans une ambiance conviviale.', 'Jeu de societe.jpg'),
+
+('Tournoi Mario Kart', 'Tournois', '2026-05-24', '14h00 - 17h00', 'Espace détente', 20, 20, 'Complet', 'Affrontez les autres étudiants dans un tournoi fun et compétitif.', 'Mario.jpg'),
+
+('Atelier peinture', 'Ateliers', '2026-05-28', '15h00 - 17h00', 'Salle créativité', 15, 8, 'Ouvert', 'Un atelier créatif ouvert à tous pour découvrir la peinture.', 'Peinture.jpg');
+
+
+CREATE TABLE games (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    genre VARCHAR(150),
+    players VARCHAR(50),
+    duration VARCHAR(50),
+    min_duration INT,
+    min_players INT,
+    image VARCHAR(150),
+    description TEXT,
+    quantity INT DEFAULT 1,
+    available INT DEFAULT 1
+);
+
+
+INSERT INTO games 
+(name, genre, players, duration, min_duration, min_players, image, description, quantity, available)
+VALUES
+('Monopoly', 'Négociation & Gestion', '2 à 8', '60 à 180 min', 60, 2, 'monopoly.jpg', 'Le roi des classiques pour tester la solidité de vos colocations.', 2, 1),
+('Catan', 'Stratégie & Échange', '3 à 4', '60 à 90 min', 60, 3, 'catan.jpg', 'Construisez vos routes et vos villes avant les autres.', 1, 1),
+('Carcassonne', 'Placement de tuiles', '2 à 5', '35 à 45 min', 35, 2, 'carcassonne.jpg', 'Construisez une cité médiévale tuile après tuile.', 1, 1),
+('Uno', 'Jeu de cartes', '2 à 10', '15 à 30 min', 15, 2, 'uno.jpg', 'Un classique rapide et fun pour jouer en groupe.', 3, 2);
+
+
+INSERT INTO games 
+(name, genre, players, duration, min_duration, min_players, image, description, quantity, available)
+VALUES
+('Monopoly', 'Négociation & Gestion', '2 à 8', '60 à 180 min', 60, 2, 'monopoly.jpg', 'Le roi des classiques pour tester la solidité de vos colocations. Idéal pour libérer le requin de la finance qui sommeille en vous.', 2, 2),
+
+('Catan', 'Stratégie & Échange', '3 à 4', '60 à 90 min', 60, 3, 'catan.jpg', 'Vous débarquez sur une île vierge et il va falloir construire vos routes et vos villes avant les autres.', 2, 2),
+
+('Carcassonne', 'Placement de tuiles', '2 à 5', '35 à 45 min', 35, 2, 'carcassonne.jpg', 'Un jeu de pose de tuiles où vous construisez une cité médiévale paysage après paysage.', 2, 2),
+
+('Uno', 'Jeu de cartes', '2 à 10', '15 à 30 min', 15, 2, 'uno.jpg', 'Le boss final des jeux de cartes. Le but est simple : vider sa main en associant les couleurs ou les chiffres.', 3, 3),
+
+('Scrabble', 'Réflexion & Lettres', '2 à 4', '60 à 90 min', 60, 2, 'scrabble.jpg', 'Le jeu de mots croisés légendaire. Parfait pour tester son vocabulaire.', 1, 1),
+
+('Les Aventuriers du Rail', 'Stratégie & Placement', '2 à 5', '30 à 60 min', 30, 2, 'rail.jpg', 'Prenez le contrôle des voies ferrées et reliez les villes pour marquer un maximum de points.', 1, 1),
+
+('Dixit', 'Imagination & Déduction', '3 à 6', '30 min', 30, 3, 'dixit.jpg', 'Un jeu poétique où il faut faire deviner une carte illustrée avec un indice.', 2, 2),
+
+('7 Wonders', 'Développement', '2 à 7', '30 min', 30, 2, '7wonders.jpg', 'Développez votre cité antique, votre armée, votre science, votre commerce et votre merveille.', 1, 1),
+
+('Pandémie', 'Gestion de crise', '2 à 4', '45 min', 45, 2, 'pandemie.jpg', 'Un jeu coopératif où vous devez sauver le monde de plusieurs virus mortels.', 1, 1),
+
+('Codenames', 'Déduction', '2 à 8+', '15 min', 15, 2, 'codenames.jpg', 'Deux équipes s’affrontent pour faire deviner des mots à partir d’indices.', 2, 2),
+
+('Time''s Up!', 'Ambiance & Rapidité', '4 à 12', '30 à 40 min', 30, 4, 'timesup.jpg', 'Un jeu d’ambiance où il faut faire deviner des personnalités ou objets en plusieurs manches.', 2, 2),
+
+('Loup-Garou de Thiercelieux', 'Bluff & Rôles cachés', '8 à 18', '20 à 30 min', 20, 8, 'loupgarou.jpg', 'Un jeu de bluff où les villageois doivent démasquer les loups-garous cachés parmi eux.', 1, 1);
+
+CREATE TABLE game_reservations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    game_id INT NOT NULL,
+    reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_date DATE,
+    status VARCHAR(50) DEFAULT 'En cours'
+);

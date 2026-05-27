@@ -500,10 +500,10 @@ body {
 						<a href="dashboard-membre.php">Tableau de bord</a>
 						<a href="evenement-membre.php">Créer un événement</a>
 					<?php else : ?>
-						<a href="#">Jeux</a>
+						<a href="jeux.php">Jeux</a>
 					<?php endif; ?>
 
-					<a href="#">Réservations</a>
+					<a href="reservations.html">Réservations</a>
 					<a href="#">Notifications</a>
 					<a href="#">À propos</a>
 					<a href="profil.php" class="active">Mon compte</a>

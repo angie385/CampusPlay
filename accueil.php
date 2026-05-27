@@ -1,319 +1,692 @@
+<?php
+require_once "auth.php";
+require_once "db.php";
+
+$isConnected = isConnected();
+$role = getRole();
+
+$stmt = $pdo->query("
+    SELECT *
+    FROM events
+    ORDER BY event_date ASC
+    LIMIT 4
+");
+
+$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusPlay - Accueil</title>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+		<title>OffCampus - Accueil</title>
 
-        body {
-            background: #f4f6fb;
-            color: #222;
-        }
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+		
+		<link rel="icon" type="image/png" href="images/logo.png">
 
-        .page {
-            width: 90%;
-            max-width: 1200px;
-            margin: 30px auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        }
+		<style>
 
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+		/*  ======== VARIABLES GLOBALES (ROOT)  ========== */
 
-        header h1 {
-            font-size: 36px;
-            color: #2563eb;
-        }
+		:root {
+			--bg:#f5f7ff;
 
-        header span {
-            color: #16a34a;
-        }
+			--white:rgba(255,255,255,0.78);
 
-        nav {
-            display: flex;
-            justify-content: center;
-            border: 1px solid #ddd;
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 35px;
-            background: #fff;
-        }
+			--blue:#4f46e5;
+			--blue-light:#eef2ff;
 
-        nav a {
-            flex: 1;
-            text-align: center;
-            padding: 15px;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            border-right: 1px solid #ddd;
-        }
+			--pink:#ec4899;
+			--pink-light:#fff1f7;
 
-        nav a:last-child {
-            border-right: none;
-        }
+			--green:#10b981;
+			--green-light:#ecfdf5;
 
-        nav a:hover,
-        nav a.active {
-            background: #e8f0ff;
-            color: #2563eb;
-        }
+			--purple:#8b5cf6;
+			--purple-light:#f5f3ff;
 
-        .cards {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            gap: 25px;
-            margin-bottom: 40px;
-        }
+			--text:#111827;
+			--text-light:#6b7280;
 
-        .card {
-            background: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
-        }
+			--shadow:0 10px 30px rgba(0,0,0,0.06);
+		}
 
-        .card h2 {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: #2563eb;
-        }
 
-        .card ul {
-            margin-left: 20px;
-            margin-bottom: 20px;
-        }
+		/*  ======== RESET GLOBAL  ========== */
 
-        .card li {
-            margin-bottom: 8px;
-            color: #555;
-        }
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
 
-        .card button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 10px;
-            background: #2563eb;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
 
-        .card button:hover {
-            background: #1d4ed8;
-        }
+		/*  ======== BASE BODY & PAGE  ========== */
 
-        .main-section {
-            border: 1px solid #ddd;
-            border-radius: 22px;
-            padding: 25px;
-            background: #fafafa;
-        }
+		body {
+			font-family: "Inter", sans-serif;
+			color: var(--text);
+			background:
+				linear-gradient(rgba(245,247,255,0.90), rgba(245,247,255,0.90)),
+				url("campus.png");
+			background-size: cover;
+			background-position: center;
+			background-attachment: fixed;
+			min-height: 100vh;
+			padding: 40px;
+		}
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+		.page {
+			max-width: 1450px;
+			margin: auto;
+		}
 
-        .section-header h2 {
-            font-size: 28px;
-        }
 
-        .section-header button {
-            padding: 11px 18px;
-            border: none;
-            border-radius: 12px;
-            background: #16a34a;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+		/*  ======== HEADER  ========== */
 
-        .events {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-        }
+		header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 35px;
+		}
 
-        .event {
-            background: white;
-            padding: 18px;
-            border-radius: 16px;
-            border: 1px solid #ddd;
-        }
+		.logo-box {
+			display: flex;
+			align-items: center;
+			gap: 18px;
+			padding: 18px 28px;
+			border-radius: 28px;
+			background: rgba(255,255,255,0.7);
+			backdrop-filter: blur(12px);
+			box-shadow: var(--shadow);
+		}
 
-        .event h3 {
-            color: #2563eb;
-            margin-bottom: 10px;
-        }
+		.logo {
+			height: 70px;
+			border-radius: 14px;
+		}
 
-        .event p {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 8px;
-        }
+		.logo-title {
+			font-size: 44px;
+			font-weight: 800;
+			color: var(--blue);
+		}
 
-        .places {
-            margin-top: 12px;
-            font-weight: bold;
-            color: #16a34a;
-        }
+		.logo-title span {
+			color: var(--pink);
+		}
 
-        @media screen and (max-width: 900px) {
-            .cards {
-                grid-template-columns: 1fr;
-            }
 
-            .events {
-                grid-template-columns: 1fr 1fr;
-            }
+		/*  ======== LOGIN BUTTON  ========== */
 
-            nav {
-                flex-wrap: wrap;
-            }
+		.login-btn {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 14px 22px;
+			border-radius: 18px;
+			background: white;
+			text-decoration: none;
+			color: var(--text);
+			font-weight: 600;
+			box-shadow: var(--shadow);
+			transition: 0.25s;
+		}
 
-            nav a {
-                flex: 50%;
-                border-bottom: 1px solid #ddd;
-            }
-        }
+		.login-btn:hover {
+			transform: translateY(-3px);
+			background: var(--blue);
+			color: white;
+		}
 
-        @media screen and (max-width: 600px) {
-            .page {
-                width: 95%;
-                padding: 20px;
-            }
+		.login-btn svg {
+			width: 20px;
+			height: 20px;
+		}
 
-            header h1 {
-                font-size: 28px;
-            }
 
-            .events {
-                grid-template-columns: 1fr;
-            }
+		/*  ======== NAVIGATION  ========== */
 
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-        }
-    </style>
-</head>
+		nav {
+			display: flex;
+			gap: 12px;
+			background: rgba(255,255,255,0.65);
+			backdrop-filter: blur(12px);
+			padding: 12px;
+			border-radius: 24px;
+			margin-bottom: 40px;
+			box-shadow: var(--shadow);
+		}
+
+		nav a {
+			flex: 1;
+			text-align: center;
+			padding: 16px;
+			text-decoration: none;
+			color: #374151;
+			font-weight: 600;
+			border-radius: 16px;
+			transition: 0.25s;
+		}
+
+		nav a:hover {
+			background: white;
+			transform: translateY(-2px);
+		}
+
+		nav a.active {
+			background: var(--blue);
+			color: white;
+			box-shadow: 0 8px 20px rgba(79,70,229,0.25);
+		}
+
+
+		/*  ======== HERO SECTION  ========== */
+
+		.hero {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 40px;
+			padding: 45px;
+			margin-bottom: 40px;
+			border-radius: 32px;
+			background: rgba(255,255,255,0.72);
+			backdrop-filter: blur(14px);
+			box-shadow: var(--shadow);
+		}
+
+		.hero-left h1 {
+			font-size: 58px;
+			line-height: 1.05;
+			margin-bottom: 20px;
+		}
+
+		.hero-left h1 span {
+			color: var(--blue);
+		}
+
+		.hero-left p {
+			font-size: 18px;
+			color: var(--text-light);
+			line-height: 1.7;
+			max-width: 650px;
+		}
+
+		.hero-buttons {
+			display: flex;
+			gap: 15px;
+			margin-top: 28px;
+		}
+
+		.primary-btn {
+			background: var(--blue);
+			color: white;
+			padding: 15px 24px;
+			border-radius: 18px;
+			text-decoration: none;
+			font-weight: 700;
+			transition: 0.25s;
+			box-shadow: 0 10px 25px rgba(79,70,229,0.25);
+		}
+
+		.primary-btn:hover {
+			transform: translateY(-3px);
+		}
+
+		.secondary-btn {
+			background: white;
+			color: var(--text);
+			padding: 15px 24px;
+			border-radius: 18px;
+			text-decoration: none;
+			font-weight: 700;
+			transition: 0.25s;
+		}
+
+		.secondary-btn:hover {
+			transform: translateY(-3px);
+		}
+
+
+		/*  ======== CARDS (NOTIFICATIONS / EVENTS / CONTACTS)  ========== */
+
+		.cards {
+			display: grid;
+			grid-template-columns: repeat(3,1fr);
+			gap: 28px;
+			margin-bottom: 45px;
+		}
+
+		.card {
+			padding: 30px;
+			border-radius: 28px;
+			box-shadow: var(--shadow);
+			transition: 0.25s;
+		}
+
+		.card:hover {
+			transform: translateY(-5px);
+		}
+
+		.card h2 {
+			font-size: 28px;
+			margin-bottom: 18px;
+		}
+
+		.card p {
+			color: var(--text-light);
+			line-height: 1.7;
+			margin-bottom: 24px;
+		}
+
+		.card button {
+			border: none;
+			padding: 14px 20px;
+			border-radius: 14px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: 0.25s;
+		}
+
+		/* Notifications */
+		.card.notifications {
+			background: var(--pink-light);
+		}
+
+		.card.notifications h2 {
+			color: var(--pink);
+		}
+
+		.card.notifications button {
+			background: var(--pink);
+			color: white;
+		}
+
+		/* Events */
+		.card.events {
+			background: var(--green-light);
+		}
+
+		.card.events h2 {
+			color: var(--green);
+		}
+
+		.card.events button {
+			background: var(--green);
+			color: white;
+		}
+
+		/* Contacts */
+		.card.contacts {
+			background: var(--purple-light);
+		}
+
+		.card.contacts h2 {
+			color: var(--purple);
+		}
+
+		.card.contacts button {
+			background: var(--purple);
+			color: white;
+		}
+
+
+		/*  ======== EVENTS SECTION  ========== */
+
+		.event-card {
+			text-decoration: none;
+			color: inherit;
+			display: block;
+		}
+
+		.events-section {
+			padding: 35px;
+			border-radius: 32px;
+			background: rgba(255,255,255,0.74);
+			backdrop-filter: blur(12px);
+			box-shadow: var(--shadow);
+		}
+
+		.section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 30px;
+		}
+
+		.section-header h2 {
+			font-size: 38px;
+		}
+
+		.calendar-btn {
+			background: var(--blue);
+			color: white;
+			text-decoration: none;
+			padding: 14px 22px;
+			border-radius: 18px;
+			font-weight: 700;
+			transition: 0.25s;
+		}
+
+		.calendar-btn:hover {
+			transform: translateY(-3px);
+		}
+
+		.events-grid {
+			display: grid;
+			grid-template-columns: repeat(4,1fr);
+			gap: 22px;
+		}
+
+		.event-card {
+			background: white;
+			border-radius: 24px;
+			padding: 24px;
+			transition: 0.25s;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.event-card::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 6px;
+			background: linear-gradient(90deg, var(--blue), var(--pink));
+		}
+
+		.event-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+		}
+
+		.event-date {
+			display: inline-block;
+			padding: 8px 12px;
+			border-radius: 12px;
+			background: var(--blue-light);
+			color: var(--blue);
+			font-weight: 700;
+			font-size: 14px;
+			margin-bottom: 18px;
+		}
+
+		.event-card h3 {
+			font-size: 24px;
+			margin-bottom: 12px;
+		}
+
+		.event-location {
+			color: var(--text-light);
+			margin-bottom: 14px;
+		}
+
+		.event-description {
+			color: var(--text-light);
+			line-height: 1.6;
+			margin-bottom: 18px;
+		}
+
+		.places {
+			font-weight: 700;
+			color: var(--green);
+		}
+
+
+		/*  ======== RESPONSIVE  ========== */
+
+		@media(max-width:1100px) {
+			.cards {
+				grid-template-columns: 1fr;
+			}
+			.events-grid {
+				grid-template-columns: 1fr 1fr;
+			}
+			.hero {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+			.hero-left h1 {
+				font-size: 46px;
+			}
+		}
+
+		@media(max-width:800px) {
+			body {
+				padding: 20px;
+			}
+			header {
+				flex-direction: column;
+				gap: 20px;
+			}
+			nav {
+				flex-wrap: wrap;
+			}
+			nav a {
+				min-width: 140px;
+			}
+			.events-grid {
+				grid-template-columns: 1fr;
+			}
+			.hero-left h1 {
+				font-size: 38px;
+			}
+			.section-header {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 20px;
+			}
+		}
+
+
+		</style>
+	</head>
 
 <body>
 
-    <div class="page">
+<div class="page">
 
-        <header>
-            <h1>Campus<span>Play</span></h1>
-        </header>
 
-        <nav>
-            <a href="accueil.php" class="active">Accueil</a>
-            <a href="activite.php">Événements / Activités</a>
-            <a href="#">Jeux</a>
-            <a href="#">Réservations</a>
-            <a href="#">Communauté</a>
-            <a href="#">Compte</a>
-        </nav>
+    <header>
 
-        <section class="cards">
+        <div class="logo-box">
 
-            <div class="card">
-                <h2>Notifications</h2>
-                <ul>
-                    <li>Rappel : soirée jeux demain</li>
-                    <li>Réservation confirmée</li>
-                    <li>Nouvel événement disponible</li>
-                </ul>
-                <button>Voir tout</button>
+            <img src="images/logo_cropped.jpeg" class="logo">
+
+            <div class="logo-title">
+                Off<span>Campus</span>
             </div>
 
-            <div class="card">
-                <h2>S'inscrire à un événement</h2>
-                <ul>
-                    <li>Voir les événements disponibles</li>
-                    <li>Consulter le nombre de places</li>
-                    <li>Rejoindre une liste d'attente</li>
-                </ul>
-                <button>S'inscrire</button>
-            </div>
+        </div>
 
-            <div class="card">
-                <h2>Contacts</h2>
-                <ul>
-                    <li>Bureau de l'association</li>
-                    <li>Responsables des activités</li>
-                    <li>Support CampusPlay</li>
-                </ul>
-                <button>Voir tout</button>
-            </div>
+        <?php if ($isConnected) : ?>
 
-        </section>
+			<a href="profil.php" class="login-btn">
+				Mon profil
+			</a>
 
-        <section class="main-section">
+		<?php else : ?>
 
-            <div class="section-header">
-                <h2>Événements à venir</h2>
-                <button>Voir le calendrier</button>
-            </div>
+			<a href="connexion.php" class="login-btn">
+				Se connecter
+			</a>
 
-            <div class="events">
+		<?php endif; ?>
 
-                <div class="event">
-                    <h3>Soirée jeux</h3>
-                    <p>Mercredi 29 mai</p>
-                    <p>Salle B12</p>
-                    <p>Découverte de jeux de société.</p>
-                    <div class="places">3/10 places</div>
-                </div>
+    </header>
 
-                <div class="event">
-                    <h3>Tournoi Mario Kart</h3>
-                    <p>Vendredi 31 mai</p>
-                    <p>Espace détente</p>
-                    <p>Tournoi entre étudiants.</p>
-                    <div class="places">7/10 places</div>
-                </div>
 
-                <div class="event">
-                    <h3>Atelier peinture</h3>
-                    <p>Lundi 3 juin</p>
-                    <p>Salle créativité</p>
-                    <p>Activité artistique encadrée.</p>
-                    <div class="places">5/12 places</div>
-                </div>
+    <nav>
 
-                <div class="event">
-                    <h3>Festival culturel</h3>
-                    <p>Jeudi 6 juin</p>
-                    <p>Hall principal</p>
-                    <p>Animations et stands étudiants.</p>
-                    <div class="places">20/50 places</div>
-                </div>
+        <a class="active" href="accueil.php">Accueil</a>
+
+        <a href="activite.php">Événements</a>
+
+        <a href="jeux.php">Jeux</a>
+
+        <a href="reservations.html">Réservations</a>
+
+        <a href="communaute.html">Communauté</a>
+
+        <a href="#">Mon Compte</a>
+
+    </nav>
+
+
+    <section class="hero">
+
+        <div class="hero-left">
+
+            <h1>
+                La vie étudiante
+                <span>hors campus</span>
+                commence ici.
+            </h1>
+
+            <p>
+                Rejoins les événements étudiants, réserve des activités,
+                découvre des communautés et partage des moments avec les
+                autres étudiants de ton campus.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="activite.php" class="primary-btn">
+					Explorer les activités
+				</a>
+
+                <a href="communaute.html" class="secondary-btn">
+                    Découvrir la communauté
+                </a>
 
             </div>
 
-        </section>
+        </div>
 
-    </div>
+    </section>
+
+
+    <section class="cards">
+
+        <div class="card notifications">
+
+            <h2>Notifications</h2>
+
+            <p>
+                3 nouvelles activités arrivent cette semaine.
+                Tes réservations ont été confirmées.
+            </p>
+
+            <button>
+                Voir tout
+            </button>
+
+        </div>
+
+        <div class="card events">
+
+            <h2>Événements</h2>
+
+            <p>
+                Tournois, soirées jeux, ateliers artistiques
+                et activités étudiantes chaque semaine.
+            </p>
+
+            <button>
+                S'inscrire
+            </button>
+
+        </div>
+
+        <div class="card contacts">
+
+            <h2>Communauté</h2>
+
+            <p>
+                Retrouve les responsables d’activités,
+                les associations et le support étudiant.
+            </p>
+
+            <button>
+                <a href="communaute.html">Contacter</a>
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section class="events-section">
+
+        <div class="section-header">
+
+            <h2>Événements à venir</h2>
+
+            <a href="#" class="calendar-btn">
+                Voir le calendrier
+            </a>
+
+        </div>
+
+        <div class="events-grid">
+
+			<?php if (empty($events)) : ?>
+
+				<p>Aucun événement disponible pour le moment.</p>
+
+			<?php else : ?>
+
+				<?php foreach ($events as $event) : ?>
+
+					<?php
+					$placesRestantes = $event["capacity"] - $event["registered"];
+					$date = new DateTime($event["event_date"]);
+					?>
+
+					<a href="activite.php?event_id=<?php echo $event['id']; ?>" class="event-card">
+
+						<div class="event-date">
+							<?php echo strtoupper($date->format("d M")); ?>
+						</div>
+
+						<h3>
+							<?php echo htmlspecialchars($event["name"]); ?>
+						</h3>
+
+						<div class="event-location">
+							<?php echo htmlspecialchars($event["place"]); ?>
+						</div>
+
+						<div class="event-description">
+							<?php echo htmlspecialchars($event["description"]); ?>
+						</div>
+
+						<div class="places">
+							<?php echo htmlspecialchars($placesRestantes); ?> places disponibles
+						</div>
+
+					</a>
+
+				<?php endforeach; ?>
+
+			<?php endif; ?>
+
+		</div>
+
+
+    </section>
+
+</div>
 
 </body>
 </html>
