@@ -1,0 +1,25 @@
+CREATE DATABASE campusplay;
+USE campusplay;
+
+CREATE TABLE users (
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    name VARCHAR(100) NOT NULL,
+    surname VARCHAR(100) NOT NULL,
+
+    email VARCHAR(191) NOT NULL UNIQUE,
+
+    password VARCHAR(255) NOT NULL,
+
+    role VARCHAR(50) NOT NULL DEFAULT 'membre',
+
+    association VARCHAR(100),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    phone VARCHAR(20),
+
+    gender VARCHAR(20)
+
+);

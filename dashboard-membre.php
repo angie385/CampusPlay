@@ -429,11 +429,11 @@ body {
                 </div>
 
                 <nav class="menu">
-					<a href="accueil.php">Accueil</a>
+					<a href="accueil.html">Accueil</a>
 					<a href="activite.php">Événements / Activités</a>
 					<a href="dashboard-membre.php" class="active">Tableau de bord</a>
 					<a href="evenement-membre.php">Créer un événement</a>
-					<a href="#">Réservations</a>
+					<a href="reservations.html">Réservations</a>
 					<a href="#">Notifications</a>
 					<a href="#">À propos</a>
 					<a href="profil.php">Mon compte</a>

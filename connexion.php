@@ -32,6 +32,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $message = "Le mot de passe ou l’identifiant est incorrect. Réessayez.";
     }
 }
+
+try {
+
+    $pdo = new PDO(
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        $username,
+        $password
+    );
+
+    $pdo->setAttribute(
+        PDO::ATTR_ERRMODE,
+        PDO::ERRMODE_EXCEPTION
+    );
+
+}
+
+catch(PDOException $e){
+
+    die($e->getMessage());
+
+}
+
 ?>
 
 
@@ -572,7 +594,7 @@ body {
 
         <section class="left-panel">
             <div class="brand">
-                <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
+                <a href = "accueil.html"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
 
                 <h1>Bienvenue sur <span>OffCampus</span></h1>
 
@@ -615,7 +637,7 @@ body {
             <div class="login-card">
 
                 <div class="top-links">
-                    <a href="accueil.php">Accueil</a>
+                    <a href="accueil.html">Accueil</a>
                     <a href="activite.php">Activités</a>
                     <a href="a-propos.php">À propos</a>
                 </div>
@@ -698,7 +720,7 @@ body {
                 <div class="separator">ou accès rapide</div>
 
                 <div class="quick-access">
-                    <a href="accueil.php">Voir l’accueil</a>
+                    <a href="accueil.html">Voir l’accueil</a>
                     <a href="activite.php">Voir les activités</a>
                 </div>
 
