@@ -9,7 +9,7 @@ include("db.php");
 
 if (isset($_GET['id'])) {
 
-    $id = $_GET['id']; 
+    $id = intval($_GET['id']); 
 
     $sql = "UPDATE events 
             SET status = 'rejected' 

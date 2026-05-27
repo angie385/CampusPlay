@@ -10,15 +10,10 @@ include("db.php");
 $user_id = $_SESSION['user_id'];
 
 if (isset($_GET['id'])) {
+    $id = intval($_GET['id']);
 
-    $id = $_GET['id']; 
-
-    $sql = "DELETE FROM inscriptions 
-            WHERE id = :id 
-            AND user_id = :user_id";
-
+    $sql = "DELETE FROM inscriptions WHERE id = :id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
-
     $stmt->execute([
         'id' => $id,
         'user_id' => $user_id
@@ -26,7 +21,6 @@ if (isset($_GET['id'])) {
 
     header("Location: mes-inscriptions.php");
     exit();
-
 } else {
     echo "ID manquant";
 }
