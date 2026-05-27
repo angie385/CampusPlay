@@ -1,13 +1,28 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include("db.php");
 
-$id = $_GET['id'];
+if (isset($_GET['id'])) {
 
-$sql = "DELETE FROM inscriptions WHERE id='$id'";
+    $id = intval($_GET['id']);
 
-mysqli_query($conn, $sql);
+    $sql = "DELETE FROM inscriptions WHERE id = :id";
 
-header("Location: mes-inscriptions.php");
-exit();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        'id' => $id
+    ]);
+
+    header("Location: mes-inscriptions.php");
+    exit();
+
+} else {
+
+    echo "ID manquant";
+
+}
 ?>

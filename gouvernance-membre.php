@@ -1,10 +1,17 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include("db.php");
 
 $sql = "SELECT * FROM events";
 
-$result = mysqli_query($conn, $sql);
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute();
+
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -52,7 +59,7 @@ $result = mysqli_query($conn, $sql);
     <th>Actions</th>
 </tr>
 
-<?php while($event = mysqli_fetch_assoc($result)) { ?>
+<?php foreach($result as $event) { ?>
 
 <tr>
 

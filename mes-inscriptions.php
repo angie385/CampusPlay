@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include("db.php");
 
@@ -13,9 +16,15 @@ $sql = "SELECT events.titre,
         JOIN events
         ON inscriptions.evenement_id = events.id
 
-        WHERE inscriptions.user_id = '$user_id'";
+        WHERE inscriptions.user_id = :user_id";
 
-$result = mysqli_query($conn, $sql);
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    'user_id' => $user_id
+]);
+
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +59,7 @@ $result = mysqli_query($conn, $sql);
     <th>Action</th>
 </tr>
 
-<?php while($row = mysqli_fetch_assoc($result)) { ?>
+<?php foreach($result as $row) { ?>
 
 <tr>
 

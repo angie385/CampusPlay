@@ -1,14 +1,29 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include("db.php");
 
-$id = $_GET['id'];
+if (isset($_GET['id'])) {
 
-$sql = "UPDATE events
-        SET status='approved'
-        WHERE id='$id'";
+    $id = intval($_GET['id']);
 
-mysqli_query($conn, $sql);
+    $sql = "UPDATE events
+            SET status = 'approved'
+            WHERE id = :id";
 
-header("Location: gouvernance-membre.php");
-exit();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        'id' => $id
+    ]);
+
+    header("Location: gouvernance-membre.php");
+    exit();
+
+} else {
+
+    echo "ID manquant";
+
+}
 ?>

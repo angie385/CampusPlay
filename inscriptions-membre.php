@@ -1,6 +1,13 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include("db.php");
+
+if (!isset($_SESSION['user_id'])) {
+    die("Utilisateur non connecté");
+}
 
 $user_id = $_SESSION['user_id'];
 
@@ -8,18 +15,28 @@ if(isset($_POST['inscrire'])) {
 
     $event_id = $_POST['event_id'];
 
-    $check = "SELECT * FROM inscriptions 
-              WHERE user_id='$user_id' 
-              AND evenement_id='$event_id'";
+    $check = "SELECT * FROM inscriptions
+              WHERE user_id = :user_id
+              AND evenement_id = :event_id";
 
-    $resultCheck = mysqli_query($conn, $check);
+    $stmtCheck = $pdo->prepare($check);
 
-    if(mysqli_num_rows($resultCheck) == 0) {
+    $stmtCheck->execute([
+        'user_id' => $user_id,
+        'event_id' => $event_id
+    ]);
+
+    if($stmtCheck->rowCount() == 0) {
 
         $sql = "INSERT INTO inscriptions(user_id, evenement_id)
-                VALUES('$user_id', '$event_id')";
+                VALUES(:user_id, :event_id)";
 
-        mysqli_query($conn, $sql);
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            'user_id' => $user_id,
+            'event_id' => $event_id
+        ]);
 
         $message = "Inscription réussie !";
 
@@ -29,7 +46,11 @@ if(isset($_POST['inscrire'])) {
     }
 }
 
-$events = mysqli_query($conn, "SELECT * FROM events");
+$eventsQuery = $pdo->prepare("SELECT * FROM events");
+
+$eventsQuery->execute();
+
+$events = $eventsQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -73,7 +94,7 @@ if(isset($message)){
 }
 ?>
 
-<?php while($event = mysqli_fetch_assoc($events)) { ?>
+<?php foreach($events as $event) { ?>
 
 <div class="card">
 
