@@ -3,24 +3,6 @@ require_once "auth.php";
 requireMember();
 require_once "notification_helper.php";
 
-addNotification(
-    $pdo,
-    $_SESSION["user_id"],
-    "Événement ajouté",
-    "Votre événement a bien été ajouté sur OffCampus.",
-    "success",
-    "dashboard-membre.php"
-);
-
-addNotification(
-    $pdo,
-    $_SESSION["user_id"],
-    "Événement accepté",
-    "La demande d’événement a bien été acceptée.",
-    "success",
-    "dashboard-membre.php"
-);
-
 ?>
 
 <!DOCTYPE html>
@@ -65,10 +47,9 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex-shrink: 0;
 }
 
-.logo-box {
+.logo {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -76,14 +57,11 @@ body {
     width: 100%;
 }
 
-.logo-box img {
-    width: 110px;
-    height: 110px;
+.logo img {
+    width: 150px;
+    height: 150px;
     object-fit: contain;
-}
-
-.logo-text {
-    display: none;
+    display: block;
 }
 
 .menu a {
@@ -139,6 +117,7 @@ body {
     margin-top: 2px;
     line-height: 1.2;
 }
+
 
 
 /*  ======== MAIN  ========== */
@@ -432,6 +411,83 @@ body {
     background: #fecaca;
 }
 
+/* ======== ACTIVITÉ RÉCENTE ======== */
+
+.activity-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.activity{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:15px;
+    background:#f9fafb;
+    border:1px solid #edf0f5;
+    border-radius:16px;
+    transition:0.2s;
+}
+
+.activity:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    flex-shrink:0;
+    background:#6366f1;
+}
+
+.dot.green{
+    background:#22c55e;
+}
+
+.dot.orange{
+    background:#f59e0b;
+}
+
+.activity-content{
+    flex:1;
+}
+
+.activity-title{
+    font-weight:700;
+    color:#111827;
+    margin-bottom:4px;
+}
+
+.activity-desc{
+    color:#6b7280;
+    font-size:14px;
+}
+
+.activity-badge{
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.badge-green{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-orange{
+    background:#ffedd5;
+    color:#9a3412;
+}
+
+.badge-blue{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
 
 </style>
 </head>
@@ -441,39 +497,7 @@ body {
     <div class="container">
 
         <!-- MENU GAUCHE -->
-        <aside class="sidebar">
-            <div>
-                <div class="logo-box">
-                    <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
-                    <div class="logo-text">Off<span>Campus</span></div>
-                </div>
-
-                <nav class="menu">
-					<a href="accueil.php">Accueil</a>
-					<a href="activite.php">Événements / Activités</a>
-					<a href="dashboard-membre.php" class="active">Tableau de bord</a>
-					<a href="evenement-membre.php">Créer un événement</a>
-					<a href="reservations.php">Réservations</a>
-					<a href="#">Notifications</a>
-					<a href="a-propos.php">À propos</a>
-					<a href="profil.php">Mon compte</a>
-				</nav>
-            </div>
-
-            <div class="user-box" onclick="window.location.href='profil.php'">
-				<div class="avatar">
-					<?php echo strtoupper(substr($_SESSION["surname"] ?? "M", 0, 1)); ?>
-				</div>
-
-				<div>
-					<strong>
-						<?php echo htmlspecialchars($_SESSION["surname"] ?? "Membre"); ?>
-					</strong>
-
-					<p>Membre association</p>
-				</div>
-			</div>
-        </aside>
+        <?php include "sidebar.php"; ?>
 
         <!-- CONTENU PRINCIPAL -->
         <main class="main">

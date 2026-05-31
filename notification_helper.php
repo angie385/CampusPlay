@@ -1,4 +1,8 @@
 <?php
+require_once "auth.php";
+requireLogin();
+require_once "db.php";
+
 function addNotification($pdo, $userId, $title, $message, $type = "info", $link = null) {
     $stmt = $pdo->prepare("
         INSERT INTO notifications (user_id, title, message, type, link, is_read)

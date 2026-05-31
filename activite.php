@@ -672,10 +672,6 @@ h1 {
 			<a href="notifications.php">Notifications</a>
 			<a href="a-propos.php">À propos</a>
 			<a href="profil.php">Mon compte</a>
-
-			<?php if ($role === "membre") : ?>
-				<a href="deconnexion.php">Déconnexion</a>
-			<?php endif; ?>
 		</nav>
     </div>
 
@@ -763,7 +759,7 @@ h1 {
 						<?php foreach ($latestNotifications as $notif) : ?>
 
 							<div class="notification <?php echo $notif["is_read"] ? "read" : "unread"; ?>"
-								onclick="markAsRead(this)"
+								onclick="markAsRead(this)">
 
 								<p>
 									<strong><?php echo htmlspecialchars($notif["title"]); ?></strong><br>
@@ -794,7 +790,7 @@ const IS_CONNECTED = <?php echo $isConnected ? "true" : "false"; ?>;
 let selectedFilter = "Tous";
 let selectedDay = null;
 
-const events = [
+let events = [
     {
         id: 1,
         title: "Soirée jeux de société",
@@ -992,6 +988,94 @@ const events = [
 	}
 ];
 
+const defaultEvents = [...events];
+const API_URL = "events_api.php";
+
+function parseLocalDate(dateString) {
+    if (!dateString) {
+        return new Date();
+    }
+
+    const parts = dateString.split("-");
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatLongDate(dateString) {
+    const date = parseLocalDate(dateString);
+
+    const jours = [
+        "Dimanche", "Lundi", "Mardi", "Mercredi",
+        "Jeudi", "Vendredi", "Samedi"
+    ];
+
+    const mois = [
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+    ];
+
+    return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function getEventImage(event) {
+    if (event.image && event.image.trim() !== "") {
+        return event.image;
+    }
+
+    return "Jeu de societe.jpg";
+}
+
+function convertApiEvent(event) {
+    const eventDate = parseLocalDate(event.event_date);
+
+    return {
+        id: Number(event.id),
+        title: event.name || "Événement sans nom",
+        category: event.category || "Autre",
+        image: getEventImage(event),
+        description: event.description || "",
+        date: formatLongDate(event.event_date),
+        day: eventDate.getDate(),
+        fullDate: event.event_date,
+        time: event.event_time || "Horaire non précisé",
+        place: event.place || "Lieu non précisé",
+        capacity: Number(event.capacity || 0),
+        registered: Number(event.registered || 0),
+        status: event.status || "Ouvert",
+        joined: false,
+        waiting: false
+    };
+}
+
+async function loadEvents() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (!data.success) {
+            document.getElementById("eventsList").innerHTML = `
+                <div class="empty">Impossible de charger les événements.</div>
+            `;
+            return;
+        }
+
+        events = [
+			...defaultEvents,
+			...data.events.map(convertApiEvent)
+		];
+
+        renderEvents();
+		renderCalendar();
+		
+
+    } catch (error) {
+        document.getElementById("eventsList").innerHTML = `
+            <div class="empty">
+                Erreur serveur. Vérifie que WampServer est lancé et que tu ouvres la page avec localhost.
+            </div>
+        `;
+    }
+}
+
 document.getElementById("roleText").textContent =
     USER_ROLE === "membre" ? "Membre association" : "Étudiant";
 
@@ -1157,8 +1241,7 @@ function joinEvent(id) {
         addNotification(`Inscription confirmée : ${event.title}`);
     }
 
-    renderEvents();
-    renderCalendar();
+    loadEvents();
     showDetails(id);
 }
 
@@ -1171,8 +1254,7 @@ function leaveEvent(id) {
         addNotification(`Désinscription effectuée : ${event.title}`);
     }
 
-    renderEvents();
-    renderCalendar();
+    loadEvents();
     closeDetails();
 }
 
@@ -1216,8 +1298,7 @@ function cancelEvent(id) {
         event.status = "Annulé";
         addNotification(`Événement annulé : ${event.title}`);
         events.splice(events.indexOf(event), 1);
-        renderEvents();
-        renderCalendar();
+        loadEvents();
         document.getElementById("detailsBox").innerHTML = `
             <h3>Détail événement</h3>
             <p>L'événement a été annulé.</p>
@@ -1299,7 +1380,7 @@ function renderCalendar() {
 		}
 
         const hasEvent = events.some(event => {
-            const eventDate = new Date(event.fullDate);
+            const eventDate = parseLocalDate(event.fullDate);
             return (
                 eventDate.getDate() === day &&
                 eventDate.getMonth() === currentMonth &&
@@ -1308,7 +1389,7 @@ function renderCalendar() {
         });
 
         const hasReservation = events.some(event => {
-            const eventDate = new Date(event.fullDate);
+            const eventDate = parseLocalDate(event.fullDate);
 
             return (
                 event.joined &&
@@ -1332,8 +1413,7 @@ function renderCalendar() {
 
             selectedDay = day;
 
-            renderCalendar();
-            renderEvents();
+            loadEvents();
         };
 
         grid.appendChild(button);
@@ -1383,8 +1463,7 @@ function resetFilters() {
     document.querySelectorAll(".category").forEach(btn => btn.classList.remove("active"));
     document.querySelector('[data-filter="Tous"]').classList.add("active");
 
-    renderCalendar();
-    renderEvents();
+    loadEvents();
 }
 
 function sortEvents() {
@@ -1407,11 +1486,11 @@ function sortEvents() {
     }
 
     renderEvents();
-    renderCalendar();
+	renderCalendar();
 }
 
-renderEvents();
-renderCalendar();
+loadEvents();
+
 </script>
 
 </body>

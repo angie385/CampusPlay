@@ -3,14 +3,6 @@ require_once "auth.php";
 requireMember();
 require_once "notification_helper.php";
 
-addNotification(
-    $pdo,
-    $_SESSION["user_id"],
-    "Événement ajouté",
-    "Votre événement a bien été ajouté sur OffCampus.",
-    "success",
-    "dashboard-membre.php"
-);
 ?>
 
 <!DOCTYPE html>
@@ -54,10 +46,9 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex-shrink: 0;
 }
 
-.logo-box {
+.logo {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -65,15 +56,11 @@ body {
     width: 100%;
 }
 
-.logo-box img {
-    width: 110px;
-    height: 110px;
+.logo img {
+    width: 150px;
+    height: 150px;
     object-fit: contain;
     display: block;
-}
-
-.logo-text {
-    display: none;
 }
 
 .menu a {
@@ -489,6 +476,40 @@ textarea:focus {
     }
 }
 
+/*  ======== IMAGES EVENEMENTS  ========== */
+
+input[type="file"] {
+    padding: 11px;
+    cursor: pointer;
+}
+
+.image-preview {
+    display: none;
+    margin-top: 12px;
+    width: 100%;
+    max-height: 190px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+.image-help {
+    color: #666;
+    font-size: 13px;
+    margin-top: 7px;
+    line-height: 1.4;
+}
+
+.event-thumb {
+    width: 100%;
+    max-width: 260px;
+    height: 135px;
+    object-fit: cover;
+    border-radius: 16px;
+    margin: 10px 0;
+    border: 1px solid #e5e7eb;
+}
+
     </style>
 </head>
 
@@ -496,39 +517,7 @@ textarea:focus {
 
     <div class="container">
 
-        <aside class="sidebar">
-            <div>
-                <div class="logo-box">
-                    <a href = "accueil.php"> <img src="images/logo.jpeg" alt="Logo Off Campus"></a>
-                    <div class="logo-text">Off<span>Campus</span></div>
-                </div>
-
-                <nav class="menu">
-					<a href="accueil.php">Accueil</a>
-					<a href="activite.php">Événements / Activités</a>
-					<a href="dashboard-membre.php">Tableau de bord</a>
-					<a href="evenement-membre.php" class="active">Créer un événement</a>
-					<a href="#">Réservations</a>
-					<a href="#">Notifications</a>
-					<a href="a_propos.php">À propos</a>
-					<a href="profil.php">Mon compte</a>
-				</nav>
-            </div>
-
-			<div class="user-box" onclick="window.location.href='profil.php'">
-				<div class="avatar">
-					<?php echo strtoupper(substr($_SESSION["surname"] ?? "M", 0, 1)); ?>
-				</div>
-
-				<div>
-					<strong>
-						<?php echo htmlspecialchars($_SESSION["surname"] ?? "Membre"); ?>
-					</strong>
-
-					<p>Membre association</p>
-				</div>
-			</div>        
-		</aside>
+        <?php include "sidebar.php"; ?>
 
         <main class="main">
 
@@ -548,7 +537,7 @@ textarea:focus {
                 <div class="panel">
                     <h2 id="formTitle">Créer un événement</h2>
 
-                    <form id="eventForm">
+                    <form id="eventForm" enctype="multipart/form-data">
                         <div class="form-grid">
 
                             <div class="form-group">
@@ -607,6 +596,17 @@ textarea:focus {
                                     <option value="Console">Console</option>
                                 </select>
                             </div>
+							
+							<div class="form-group full">
+								<label for="eventImage">Image de l’événement</label>
+								<input type="file" id="eventImage" name="image" accept="image/*">
+
+								<p class="image-help">
+									Choisissez une image depuis votre PC. Formats conseillés : JPG, PNG ou WEBP.
+								</p>
+
+								<img id="imagePreview" class="image-preview" alt="Aperçu de l’image">
+							</div>
 
                             <div class="form-group full">
                                 <label for="eventDescription">Description</label>
@@ -654,6 +654,30 @@ textarea:focus {
         const submitBtn = document.getElementById("submitBtn");
         const successBox = document.getElementById("successBox");
         const errorBox = document.getElementById("errorBox");
+		
+		const eventImage = document.getElementById("eventImage");
+		const imagePreview = document.getElementById("imagePreview");
+
+		function getEventImage(event) {
+			if (event.image && event.image.trim() !== "") {
+				return "images/" + event.image;
+			}
+
+			return "images/Jeu de societe.jpg";
+		}
+
+		eventImage.addEventListener("change", function() {
+			const file = this.files[0];
+
+			if (!file) {
+				imagePreview.style.display = "none";
+				imagePreview.src = "";
+				return;
+			}
+
+			imagePreview.src = URL.createObjectURL(file);
+			imagePreview.style.display = "block";
+		});
 
         function showSuccess(message) {
             successBox.textContent = message;
@@ -729,6 +753,7 @@ textarea:focus {
 
                     <div class="event-content">
                         <h3>${event.name}</h3>
+						<img class="event-thumb" src="${getEventImage(event)}" alt="${event.name}">
                         <p><strong>${event.event_date}</strong> à ${event.event_time} — ${event.place}</p>
                         <p>${event.description}</p>
 
@@ -750,46 +775,47 @@ textarea:focus {
             });
         }
 
-        form.addEventListener("submit", async function(e) {
-            e.preventDefault();
+		form.addEventListener("submit", async function(e) {
+			e.preventDefault();
 
-            const eventData = {
-                id: editingId,
-                name: document.getElementById("eventName").value,
-                category: document.getElementById("eventCategory").value,
-                event_date: document.getElementById("eventDate").value,
-                event_time: document.getElementById("eventTime").value,
-                place: document.getElementById("eventPlace").value,
-                capacity: document.getElementById("eventCapacity").value,
-                status: document.getElementById("eventStatus").value,
-                resource: document.getElementById("eventResource").value,
-                description: document.getElementById("eventDescription").value
-            };
+			const formData = new FormData();
 
-            try {
-                const method = editingId ? "PUT" : "POST";
+			formData.append("id", editingId || "");
+			formData.append("name", document.getElementById("eventName").value);
+			formData.append("category", document.getElementById("eventCategory").value);
+			formData.append("event_date", document.getElementById("eventDate").value);
+			formData.append("event_time", document.getElementById("eventTime").value);
+			formData.append("place", document.getElementById("eventPlace").value);
+			formData.append("capacity", document.getElementById("eventCapacity").value);
+			formData.append("status", document.getElementById("eventStatus").value);
+			formData.append("resource", document.getElementById("eventResource").value);
+			formData.append("description", document.getElementById("eventDescription").value);
 
-                const response = await fetch(API_URL, {
-                    method: method,
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(eventData)
-                });
+			if (eventImage.files.length > 0) {
+				formData.append("image", eventImage.files[0]);
+			}
 
-                const data = await response.json();
+			formData.append("_method", editingId ? "PUT" : "POST");
 
-                if (data.success) {
-                    showSuccess(editingId ? "Événement modifié avec succès." : "Événement ajouté avec succès.");
-                    resetForm();
-                    loadEvents();
-                } else {
-                    showError(data.message || "Une erreur est survenue.");
-                }
-            } catch (error) {
-                showError("Erreur de connexion avec le serveur PHP.");
-            }
-        });
+			try {
+				const response = await fetch(API_URL, {
+					method: "POST",
+					body: formData
+				});
+
+				const data = await response.json();
+
+				if (data.success) {
+					showSuccess(editingId ? "Événement modifié avec succès." : "Événement ajouté avec succès.");
+					resetForm();
+					loadEvents();
+				} else {
+					showError(data.message || "Une erreur est survenue.");
+				}
+			} catch (error) {
+				showError("Erreur de connexion avec le serveur PHP.");
+			}
+		});
 
         function editEvent(id) {
             const event = events.find(event => Number(event.id) === Number(id));
@@ -809,6 +835,16 @@ textarea:focus {
             document.getElementById("eventResource").value = event.resource || "Aucune";
             document.getElementById("eventDescription").value = event.description;
 
+
+			if (event.image && event.image.trim() !== "") {
+				imagePreview.src = "images/" + event.image;
+				imagePreview.style.display = "block";
+			} else {
+				imagePreview.style.display = "none";
+				imagePreview.src = "";
+			}
+
+			eventImage.value = "";
             editingId = event.id;
             formTitle.textContent = "Modifier un événement";
             submitBtn.textContent = "Enregistrer les modifications";
@@ -853,6 +889,8 @@ textarea:focus {
             editingId = null;
             formTitle.textContent = "Créerr un événement";
             submitBtn.textContent = "Ajouter l’événement";
+			imagePreview.style.display = "none";
+			imagePreview.src = "";
         }
 
         loadEvents();
